@@ -1,7 +1,7 @@
 
 from flask import render_template
 from flask_login import LoginManager
-from forum.models import Subforum, db, User
+from .models import Subforum, db, User
 
 from . import create_app
 app = create_app()
