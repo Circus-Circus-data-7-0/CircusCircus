@@ -4,5 +4,5 @@ export SECRET_KEY="kristofer"
 
 # you can ALSO or RATHER use the following command to run the app
 cd ./forum; flask run --port 8000
-# Put this into terminal to run
+# Put this into terminal to run, make sure in CircusCircus directory
 # ./run.sh
