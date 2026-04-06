@@ -1,5 +1,5 @@
 from flask import Flask
-from forum.routes import rt
+from .routes import rt
 
 def create_app():
     """Construct the core application."""
@@ -7,9 +7,8 @@ def create_app():
     app.config.from_object('config.Config')
     # Register the main routes blueprint.
     app.register_blueprint(rt)
-
-    # Initialize the shared database object on this app.
-    from forum.models import db
+    # Set globals
+    from .models import db
     db.init_app(app)
     
     with app.app_context():

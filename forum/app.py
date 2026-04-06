@@ -1,7 +1,7 @@
 
 from flask import render_template
 from flask_login import LoginManager
-from forum.models import Subforum, db, User
+from .models import Subforum, db, User
 
 from forum import create_app
 # Build the Flask app using the package factory.
