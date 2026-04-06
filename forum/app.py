@@ -3,14 +3,17 @@ from flask import render_template
 from flask_login import LoginManager
 from forum.models import Subforum, db, User
 
-from . import create_app
+from forum import create_app
+# Build the Flask app using the package factory.
 app = create_app()
 
+# Simple metadata used by the templates and app config.
 app.config['SITE_NAME'] = 'Schooner'
 app.config['SITE_DESCRIPTION'] = 'a schooner forum'
 app.config['FLASK_DEBUG'] = 1
 
 def init_site():
+	# Create the default forum structure on first run.
 	print("creating initial subforums")
 	admin = add_subforum("Forum", "Announcements, bug reports, and general discussion about the forum belongs here")
 	add_subforum("Announcements", "View forum announcements here",admin)
@@ -19,6 +22,7 @@ def init_site():
 	add_subforum("Other", "Discuss other things here")
 
 def add_subforum(title, description, parent=None):
+	# Avoid duplicate subforums at the same level.
 	sub = Subforum(title, description)
 	if parent:
 		for subforum in parent.subforums:
@@ -35,20 +39,24 @@ def add_subforum(title, description, parent=None):
 	db.session.commit()
 	return sub
 
+# Flask-Login needs a loader so it can restore the current user from the session.
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(userid):
+	# Look up the full User row for the stored session ID.
 	return User.query.get(userid)
 
 with app.app_context():
-	db.create_all() # TODO this may be redundant
+	# Create tables if needed, then seed the database the first time it runs.
+	db.create_all()
 	if not Subforum.query.all():
 		init_site()
 
 @app.route('/')
 def index():
+	# Show only top-level subforums on the home page.
 	subforums = Subforum.query.filter(Subforum.parent_id == None).order_by(Subforum.id)
 	return render_template("subforums.html", subforums=subforums)
 
