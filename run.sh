@@ -4,4 +4,4 @@ export SECRET_KEY="kristofer"
 
 # you can ALSO or RATHER use the following command to run the app
 export FLASK_APP=forum.app
-flask run
+flask run --port 8000
