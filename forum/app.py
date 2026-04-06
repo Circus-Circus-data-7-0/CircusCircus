@@ -1,9 +1,3 @@
-import os
-import sys
-
-if __package__ in (None, ""):
-	# Allow running this file directly with `python forum/app.py`.
-	sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from flask import render_template
 from flask_login import LoginManager
@@ -65,10 +59,6 @@ def index():
 	# Show only top-level subforums on the home page.
 	subforums = Subforum.query.filter(Subforum.parent_id == None).order_by(Subforum.id)
 	return render_template("subforums.html", subforums=subforums)
-
-
-if __name__ == "__main__":
-	app.run(debug=True, port=8000)
 
 
 

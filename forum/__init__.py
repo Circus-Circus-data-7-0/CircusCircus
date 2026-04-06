@@ -1,5 +1,5 @@
 from flask import Flask
-from .routes import rt
+from forum.routes import rt
 
 def create_app():
     """Construct the core application."""
