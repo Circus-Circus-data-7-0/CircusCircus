@@ -1,5 +1,5 @@
 from flask import Flask
-from forum.routes import rt
+from .routes import rt
 
 def create_app():
     """Construct the core application."""
@@ -11,7 +11,7 @@ def create_app():
     # etc
     app.register_blueprint(rt)
     # Set globals
-    from forum.models import db
+    from .models import db
     db.init_app(app)
     
     with app.app_context():
