@@ -6,3 +6,4 @@ export SECRET_KEY="kristofer"
 cd ./forum; flask run --port 8000
 # Put this into terminal to run, make sure in CircusCircus directory
 # ./run.sh
+#fix
