@@ -8,6 +8,8 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+from .Subform import Subforum, generateLinkPath
+
 # Database models
 class User(UserMixin, db.Model):
     # Store account information and ownership of posts/comments.
@@ -72,20 +74,20 @@ class Post(db.Model):
 
         return self.savedresponce
 
-class Subforum(db.Model):
-    # Represent a forum category and its optional child subforums.
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.Text, unique=True)
-    description = db.Column(db.Text)
-    subforums = db.relationship("Subforum")
-    parent_id = db.Column(db.Integer, db.ForeignKey('subforum.id'))
-    posts = db.relationship("Post", backref="subforum")
-    path = None
-    hidden = db.Column(db.Boolean, default=False)
+# class Subforum(db.Model):
+#     # Represent a forum category and its optional child subforums.
+#     id = db.Column(db.Integer, primary_key=True)
+#     title = db.Column(db.Text, unique=True)
+#     description = db.Column(db.Text)
+#     subforums = db.relationship("Subforum")
+#     parent_id = db.Column(db.Integer, db.ForeignKey('subforum.id'))
+#     posts = db.relationship("Post", backref="subforum")
+#     path = None
+#     hidden = db.Column(db.Boolean, default=False)
 
-    def __init__(self, title, description):
-        self.title = title
-        self.description = description
+#     def __init__(self, title, description):
+#         self.title = title
+#         self.description = description
 
 class Comment(db.Model):
     # Store a comment attached to a post and authored by a user.
@@ -127,19 +129,19 @@ class Comment(db.Model):
 def error(errormessage):
 	return "<b style=\"color: red;\">" + errormessage + "</b>"
 
-def generateLinkPath(subforumid):
-	links = []
-	subforum = Subforum.query.filter(Subforum.id == subforumid).first()
-	parent = Subforum.query.filter(Subforum.id == subforum.parent_id).first()
-	links.append("<a href=\"/subforum?sub=" + str(subforum.id) + "\">" + subforum.title + "</a>")
-	while parent is not None:
-		links.append("<a href=\"/subforum?sub=" + str(parent.id) + "\">" + parent.title + "</a>")
-		parent = Subforum.query.filter(Subforum.id == parent.parent_id).first()
-	links.append("<a href=\"/\">Forum Index</a>")
-	link = ""
-	for l in reversed(links):
-		link = link + " / " + l
-	return link
+# def generateLinkPath(subforumid):
+# 	links = []
+# 	subforum = Subforum.query.filter(Subforum.id == subforumid).first()
+# 	parent = Subforum.query.filter(Subforum.id == subforum.parent_id).first()
+# 	links.append("<a href=\"/subforum?sub=" + str(subforum.id) + "\">" + subforum.title + "</a>")
+# 	while parent is not None:
+# 		links.append("<a href=\"/subforum?sub=" + str(parent.id) + "\">" + parent.title + "</a>")
+# 		parent = Subforum.query.filter(Subforum.id == parent.parent_id).first()
+# 	links.append("<a href=\"/\">Forum Index</a>")
+# 	link = ""
+# 	for l in reversed(links):
+# 		link = link + " / " + l
+# 	return link
 
 
 # Post validation helpers
