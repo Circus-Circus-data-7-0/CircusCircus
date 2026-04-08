@@ -17,7 +17,7 @@ class Post(db.Model):
     lastcheck = None
     savedresponse = None
 
-    def __init__(self, content, postdate, title=None):
+    def __init__(self, title=None, content=None, postdate=None):
         self.title = title
         self.content = content
         self.postdate = postdate
