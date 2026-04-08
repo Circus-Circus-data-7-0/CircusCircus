@@ -1,5 +1,6 @@
 from flask import Flask
 from .routes import rt
+from .post_routes import rt    
 
 def create_app():
     """Construct the core application."""

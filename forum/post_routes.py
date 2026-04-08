@@ -5,9 +5,10 @@ import datetime
 from flask import Blueprint, render_template, request, redirect, url_for
 from .models import User, Post, Subforum, valid_content, valid_title, db, generateLinkPath, error
 from .user import username_taken, email_taken, valid_username
-post_rt = Blueprint('post_routes', __name__, template_folder='templates')
+from .routes import rt
 
-@post_rt.route('/addpost')
+
+@rt.route('/addpost')
 @login_required
 def addpost():
 	# Show the new post form for the selected subforum.
@@ -17,7 +18,7 @@ def addpost():
 		return error("That subforum does not exist!")
 	return render_template("createpost.html", subforum=subforum)
 
-@post_rt.route('/viewpost')
+@rt.route('/viewpost')
 def viewpost():
 	# Show one post and its comments.
 	postid = int(request.args.get("post"))
@@ -29,7 +30,7 @@ def viewpost():
 	comments = Post.query.filter(Post.parent_id == postid).order_by(Post.id.desc())
 	return render_template("viewpost.html", post=post, path=subforumpath, comments=comments)
 
-@post_rt.route('/action_comment', methods=['POST', 'GET'])
+@rt.route('/action_comment', methods=['POST', 'GET'])
 @login_required
 def comment():
 	# Create a comment, attach it to the user and post, then save it.
@@ -45,7 +46,7 @@ def comment():
 	db.session.commit()
 	return redirect("/viewpost?post=" + str(post_id))
 
-@post_rt.route('/action_post', methods=['POST'])
+@rt.route('/action_post', methods=['POST'])
 @login_required
 def action_post():
 	# Validate a new post before saving it.
@@ -67,7 +68,7 @@ def action_post():
 		retry = True
 	if retry:
 		return render_template("createpost.html", subforum=subforum, errors=errors)
-	post = Post(content, datetime.datetime.now(), title=title)
+	post = Post(title, content, datetime.datetime.now())
 	subforum.posts.append(post)
 	user.posts.append(post)
 	db.session.commit()
