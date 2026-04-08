@@ -14,6 +14,7 @@ class Subforum(db.Model):
     path = None
     hidden = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    users = db.relationship("User", backref="subforum")
 
     def __init__(self, title, description):
         self.title = title
