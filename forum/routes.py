@@ -152,3 +152,57 @@ def action_post():
 	db.session.commit()
 	return redirect("/viewpost?post=" + str(post.id))
 
+@login_required
+@rt.route('/createsubforum', methods=['GET', 'POST'])
+def create_subforum_page():
+	# Only admins can create subforums.
+	if not current_user.admin:
+		return error("Only administrators can create subforums!")
+	
+	# Get the parent subforum if specified
+	parent_id = request.args.get('parent') or request.form.get('parent_id')
+	parent_subforum = None
+	if parent_id:
+		try:
+			parent_id = int(parent_id)
+			parent_subforum = Subforum.query.get(parent_id)
+		except (ValueError, TypeError):
+			pass
+	
+	if request.method == 'POST':
+		title = request.form['title']
+		description = request.form['description']
+		
+		# Validate input
+		errors = []
+		retry = False
+		if not valid_title(title):
+			errors.append("Title must be between 4 and 140 characters long!")
+			retry = True
+		if not valid_content(description):
+			errors.append("Description must be between 10 and 5000 characters long!")
+			retry = True
+		
+		if retry:
+			subforums = Subforum.query.filter(Subforum.parent_id == None).all()
+			return render_template("createsubforum.html", subforums=subforums, parent_subforum=parent_subforum, errors=errors)
+		
+		# Create the new subforum
+		subforum = Subforum(title, description)
+		
+		# Add to parent if specified
+		if parent_subforum:
+			parent_subforum.subforums.append(subforum)
+		
+		db.session.add(subforum)
+		db.session.commit()
+		
+		if parent_subforum:
+			return redirect("/subforum?sub=" + str(parent_subforum.id))
+		else:
+			return redirect("/")
+	
+	# GET request - show the form
+	subforums = Subforum.query.filter(Subforum.parent_id == None).all()
+	return render_template("createsubforum.html", subforums=subforums, parent_subforum=parent_subforum)
+
