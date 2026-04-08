@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-from .Subform import Subforum, generateLinkPath
+from .subforum import Subforum, generateLinkPath
 
 # Database models
 class User(UserMixin, db.Model):

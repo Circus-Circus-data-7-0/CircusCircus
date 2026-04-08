@@ -2,7 +2,7 @@
 from flask import render_template
 from flask_login import LoginManager
 from .models import db, User
-from .Subform import Subforum, db
+from .subforum import Subforum, db
 
 from forum import create_app
 # Build the Flask app using the package factory.

@@ -1,5 +1,6 @@
 from flask import Flask
 from .routes import rt
+from .subforum_route import rt
 
 def create_app():
     """Construct the core application."""
@@ -9,6 +10,7 @@ def create_app():
     app.register_blueprint(rt)
     # Set globals
     from .models import db
+    from .subforum import db
     db.init_app(app)
     
     with app.app_context():
