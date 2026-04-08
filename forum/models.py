@@ -17,7 +17,6 @@ class User(UserMixin, db.Model):
     email = db.Column(db.Text, unique=True)
     admin = db.Column(db.Boolean, default=False)
     posts = db.relationship("Post", backref="user")
-    comments = db.relationship("Comment", backref="user")
 
     def __init__(self, email, username, password):
         # Save the hashed password instead of the plain text password.
@@ -29,48 +28,7 @@ class User(UserMixin, db.Model):
         # Compare a password guess against the stored hash.
         return check_password_hash(self.password_hash, password)
     
-class Post(db.Model):
-    # Store one forum post and link it to a user and subforum.
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.Text)
-    content = db.Column(db.Text)
-    comments = db.relationship("Comment", backref="post")
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    subforum_id = db.Column(db.Integer, db.ForeignKey('subforum.id'))
-    postdate = db.Column(db.DateTime)
 
-    # Simple in-memory cache for human-readable time labels.
-    lastcheck = None
-    savedresponce = None
-
-    def __init__(self, title, content, postdate):
-        self.title = title
-        self.content = content
-        self.postdate = postdate
-
-    def get_time_string(self):
-        # Only recalculate the label every 30 seconds.
-        now = datetime.datetime.now()
-        if self.lastcheck is None or (now - self.lastcheck).total_seconds() > 30:
-            self.lastcheck = now
-        else:
-            return self.savedresponce
-
-        diff = now - self.postdate
-
-        seconds = diff.total_seconds()
-        if seconds / (60 * 60 * 24 * 30) > 1:
-            self.savedresponce =  " " + str(int(seconds / (60 * 60 * 24 * 30))) + " months ago"
-        elif seconds / (60 * 60 * 24) > 1:
-            self.savedresponce =  " " + str(int(seconds / (60*  60 * 24))) + " days ago"
-        elif seconds / (60 * 60) > 1:
-            self.savedresponce = " " + str(int(seconds / (60 * 60))) + " hours ago"
-        elif seconds / (60) > 1:
-            self.savedresponce = " " + str(int(seconds / 60)) + " minutes ago"
-        else:
-            self.savedresponce =  "Just a moment ago!"
-
-        return self.savedresponce
 
 class Subforum(db.Model):
     # Represent a forum category and its optional child subforums.
@@ -87,42 +45,9 @@ class Subforum(db.Model):
         self.title = title
         self.description = description
 
-class Comment(db.Model):
-    # Store a comment attached to a post and authored by a user.
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.Text)
-    postdate = db.Column(db.DateTime)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
-
-    lastcheck = None
-    savedresponce = None
-
-    def __init__(self, content, postdate):
-        self.content = content
-        self.postdate = postdate
-
-    def get_time_string(self):
-        # Only recalculate the label every 30 seconds.
-        now = datetime.datetime.now()
-        if self.lastcheck is None or (now - self.lastcheck).total_seconds() > 30:
-            self.lastcheck = now
-        else:
-            return self.savedresponce
-
-        diff = now - self.postdate
-        seconds = diff.total_seconds()
-        if seconds / (60 * 60 * 24 * 30) > 1:
-            self.savedresponce =  " " + str(int(seconds / (60 * 60 * 24 * 30))) + " months ago"
-        elif seconds / (60 * 60 * 24) > 1:
-            self.savedresponce =  " " + str(int(seconds / (60*  60 * 24))) + " days ago"
-        elif seconds / (60 * 60) > 1:
-            self.savedresponce = " " + str(int(seconds / (60 * 60))) + " hours ago"
-        elif seconds / (60) > 1:
-            self.savedresponce = " " + str(int(seconds / 60)) + " minutes ago"
-        else:
-            self.savedresponce =  "Just a moment ago!"
-        return self.savedresponce
+# Post is defined in post.py; imported here after db is ready to avoid
+# circular imports while keeping Post in its own module.
+from .post import Post  # noqa: E402
 
 def error(errormessage):
 	return "<b style=\"color: red;\">" + errormessage + "</b>"

@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user
 from flask_login.utils import login_required
 import datetime
 from flask import Blueprint, render_template, request, redirect, url_for
-from .models import User, Post, Comment, Subforum, valid_content, valid_title, db, generateLinkPath, error
+from .models import User, Post, Subforum, valid_content, valid_title, db, generateLinkPath, error
 from .user import username_taken, email_taken, valid_username
 
 # Route handlers for login, browsing, and content creation.
@@ -102,8 +102,8 @@ def viewpost():
 	if not post:
 		return error("That post does not exist!")
 	subforumpath = post.subforum.path or generateLinkPath(post.subforum.id)
-	# Newest comments appear first for easier reading.
-	comments = Comment.query.filter(Comment.post_id == postid).order_by(Comment.id.desc())
+	# Newest replies appear first for easier reading.
+	comments = Post.query.filter(Post.parent_id == postid).order_by(Post.id.desc())
 	return render_template("viewpost.html", post=post, path=subforumpath, comments=comments)
 
 @login_required
@@ -116,9 +116,9 @@ def comment():
 		return error("That post does not exist!")
 	content = request.form['content']
 	postdate = datetime.datetime.now()
-	comment = Comment(content, postdate)
-	current_user.comments.append(comment)
-	post.comments.append(comment)
+	reply = Post(content, postdate)
+	reply.parent_id = post_id
+	current_user.posts.append(reply)
 	db.session.commit()
 	return redirect("/viewpost?post=" + str(post_id))
 
@@ -145,7 +145,7 @@ def action_post():
 		retry = True
 	if retry:
 		return render_template("createpost.html", subforum=subforum, errors=errors)
-	post = Post(title, content, datetime.datetime.now())
+	post = Post(content, datetime.datetime.now(), title=title)
 	subforum.posts.append(post)
 	user.posts.append(post)
 	db.session.commit()
