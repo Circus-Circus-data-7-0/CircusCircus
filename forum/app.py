@@ -16,15 +16,16 @@ app.config['FLASK_DEBUG'] = 1
 def init_site():
 	# Create the default forum structure on first run.
 	print("creating initial subforums")
-	admin = add_subforum("Forum", "Announcements, bug reports, and general discussion about the forum belongs here")
-	add_subforum("Announcements", "View forum announcements here",admin)
-	add_subforum("Bug Reports", "Report bugs with the forum here", admin)
-	add_subforum("General Discussion", "Use this subforum to post anything you want")
-	add_subforum("Other", "Discuss other things here")
+	admin = add_subforum("Forum", "Announcements, bug reports, and general discussion about the forum belongs here", protected=True)
+	add_subforum("Announcements", "View forum announcements here", admin, protected=True)
+	add_subforum("Bug Reports", "Report bugs with the forum here", admin, protected=True)
+	add_subforum("General Discussion", "Use this subforum to post anything you want", protected=True)
+	add_subforum("Other", "Discuss other things here", protected=True)
 
-def add_subforum(title, description, parent=None):
+def add_subforum(title, description, parent=None, protected=False):
 	# Avoid duplicate subforums at the same level.
 	sub = Subforum(title, description)
+	sub.protected = protected
 	if parent:
 		for subforum in parent.subforums:
 			if subforum.title == title:

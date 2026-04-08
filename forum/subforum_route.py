@@ -77,3 +77,34 @@ def create_subforum_page():
 	subforums = Subforum.query.filter(Subforum.parent_id == None).all()
 	return render_template("createsubforum.html", subforums=subforums, parent_subforum=parent_subforum)
 
+@login_required
+@rt.route('/deletesubforum', methods=['POST'])
+def delete_subforum():
+	# Only admins can delete subforums.
+	if not current_user.admin:
+		return error("Only administrators can delete subforums!")
+	
+	subforum_id = int(request.form.get('subforum_id'))
+	subforum = Subforum.query.get(subforum_id)
+	
+	if not subforum:
+		return error("That subforum does not exist!")
+	
+	# Prevent deletion of protected subforums
+	if subforum.protected:
+		return error("This subforum is protected and cannot be deleted!")
+	
+	# Prevent deletion if subforum has child subforums or posts
+	if subforum.subforums or subforum.posts:
+		return error("Cannot delete a subforum that contains child subforums or posts!")
+	
+	parent_id = subforum.parent_id
+	db.session.delete(subforum)
+	db.session.commit()
+	
+	# Redirect back to parent or home
+	if parent_id:
+		return redirect("/subforum?sub=" + str(parent_id))
+	else:
+		return redirect("/")
+

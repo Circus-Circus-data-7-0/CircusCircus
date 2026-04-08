@@ -13,6 +13,7 @@ class Subforum(db.Model):
     posts = db.relationship("Post", backref="subforum")
     path = None
     hidden = db.Column(db.Boolean, default=False)
+    protected = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     users = db.relationship("User", backref="subforum")
 
