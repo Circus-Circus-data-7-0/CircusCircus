@@ -1,11 +1,12 @@
-from flask import render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, current_app
 from flask_login import current_user, login_user, logout_user
 from flask_login.utils import login_required
 import datetime
-from flask import Blueprint, render_template, request, redirect, url_for
 from .models import User, Post, Subforum, valid_content, valid_title, db, generateLinkPath, error
 from .user import username_taken, email_taken, valid_username
 from .routes import rt
+import os
+from werkzeug.utils import secure_filename
 
 
 @rt.route('/addpost')
@@ -40,7 +41,7 @@ def comment():
 		return error("That post does not exist!")
 	content = request.form['content']
 	postdate = datetime.datetime.now()
-	reply = Post(content, postdate)
+	reply = Post(content=content, postdate=postdate)
 	reply.parent_id = post_id
 	current_user.posts.append(reply)
 	db.session.commit()
@@ -68,7 +69,12 @@ def action_post():
 		retry = True
 	if retry:
 		return render_template("createpost.html", subforum=subforum, errors=errors)
-	post = Post(title, content, datetime.datetime.now())
+	file = request.files.get('upload_file')
+	filename = None
+	if file and file.filename:
+		filename = secure_filename(file.filename)
+		file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+	post = Post(title=title, content=content, postdate=datetime.datetime.now(), upload_file=filename)
 	subforum.posts.append(post)
 	user.posts.append(post)
 	db.session.commit()

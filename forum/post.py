@@ -6,6 +6,7 @@ class Post(db.Model):
     # replies point to their parent via parent_id.
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Text, nullable=True)
+    upload_file = db.Column(db.String(255), nullable=True)
     content = db.Column(db.Text)
     postdate = db.Column(db.DateTime)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -17,10 +18,11 @@ class Post(db.Model):
     lastcheck = None
     savedresponse = None
 
-    def __init__(self, title=None, content=None, postdate=None):
+    def __init__(self, title=None, content=None, postdate=None, upload_file=None):
         self.title = title
         self.content = content
         self.postdate = postdate
+        self.upload_file = upload_file
 
     def get_time_string(self):
        # Recalculate every 30 seconds to avoid inaccurate time labels
