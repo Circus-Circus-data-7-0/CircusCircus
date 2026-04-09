@@ -26,4 +26,13 @@ export DB_PASSWORD="${DB_PASSWORD:-password}"
 
 echo "Starting with MySQL database: $DB_NAME"
 
-flask run --port "$PORT"
+#flask run --port "$PORT"
+
+if [ "$1" = "--server" ]; then
+    cd ./forum && flask run --host=0.0.0.0 --port="$PORT"
+else
+    cd ./forum && flask run --port="$PORT"
+fi
+
+# To run the server, use: ./run.sh --server
+# To run the server in development mode, use: ./run.sh

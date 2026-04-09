@@ -291,6 +291,8 @@ class Config:
     
     # Flask can use this to know which module contains the app entry point.
     FLASK_APP = 'forum.app'
+    UPLOAD_FOLDER = 'forum/static/uploads'
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'webm'}
 
     
     # ========== DATABASE SETTINGS ==========

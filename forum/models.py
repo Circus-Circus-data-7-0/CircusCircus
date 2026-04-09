@@ -17,7 +17,6 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     admin = db.Column(db.Boolean, default=False)
     posts = db.relationship("Post", backref="user")
-    comments = db.relationship("Comment", backref="user")
 
     def __init__(self, email, username, password):
         # Save the hashed password instead of the plain text password.
@@ -29,6 +28,26 @@ class User(UserMixin, db.Model):
         # Compare a password guess against the stored hash.
         return check_password_hash(self.password_hash, password)
     
+
+
+class Subforum(db.Model):
+    # Represent a forum category and its optional child subforums.
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.Text, unique=True)
+    description = db.Column(db.Text)
+    subforums = db.relationship("Subforum")
+    parent_id = db.Column(db.Integer, db.ForeignKey('subforum.id'))
+    posts = db.relationship("Post", backref="subforum")
+    path = None
+    hidden = db.Column(db.Boolean, default=False)
+
+    def __init__(self, title, description):
+        self.title = title
+        self.description = description
+
+# Post is defined in post.py; imported here after db is ready to avoid
+# circular imports while keeping Post in its own module.
+from .post import Post  # noqa: E402
 class Post(db.Model):
     # Store one forum post and link it to a user and subforum.
     id = db.Column(db.Integer, primary_key=True)
@@ -72,20 +91,20 @@ class Post(db.Model):
 
         return self.savedresponce
 
-class Subforum(db.Model):
-    # Represent a forum category and its optional child subforums.
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(140), unique=True, nullable=False)
-    description = db.Column(db.Text)
-    subforums = db.relationship("Subforum")
-    parent_id = db.Column(db.Integer, db.ForeignKey('subforum.id'))
-    posts = db.relationship("Post", backref="subforum")
-    path = None
-    hidden = db.Column(db.Boolean, default=False)
+# class Subforum(db.Model):
+#     # Represent a forum category and its optional child subforums.
+#     id = db.Column(db.Integer, primary_key=True)
+#     title = db.Column(db.Text, unique=True)
+#     description = db.Column(db.Text)
+#     subforums = db.relationship("Subforum")
+#     parent_id = db.Column(db.Integer, db.ForeignKey('subforum.id'))
+#     posts = db.relationship("Post", backref="subforum")
+#     path = None
+#     hidden = db.Column(db.Boolean, default=False)
 
-    def __init__(self, title, description):
-        self.title = title
-        self.description = description
+#     def __init__(self, title, description):
+#         self.title = title
+#         self.description = description
 
 class Comment(db.Model):
     # Store a comment attached to a post and authored by a user.
@@ -127,19 +146,19 @@ class Comment(db.Model):
 def error(errormessage):
 	return "<b style=\"color: red;\">" + errormessage + "</b>"
 
-def generateLinkPath(subforumid):
-	links = []
-	subforum = Subforum.query.filter(Subforum.id == subforumid).first()
-	parent = Subforum.query.filter(Subforum.id == subforum.parent_id).first()
-	links.append("<a href=\"/subforum?sub=" + str(subforum.id) + "\">" + subforum.title + "</a>")
-	while parent is not None:
-		links.append("<a href=\"/subforum?sub=" + str(parent.id) + "\">" + parent.title + "</a>")
-		parent = Subforum.query.filter(Subforum.id == parent.parent_id).first()
-	links.append("<a href=\"/\">Forum Index</a>")
-	link = ""
-	for l in reversed(links):
-		link = link + " / " + l
-	return link
+# def generateLinkPath(subforumid):
+# 	links = []
+# 	subforum = Subforum.query.filter(Subforum.id == subforumid).first()
+# 	parent = Subforum.query.filter(Subforum.id == subforum.parent_id).first()
+# 	links.append("<a href=\"/subforum?sub=" + str(subforum.id) + "\">" + subforum.title + "</a>")
+# 	while parent is not None:
+# 		links.append("<a href=\"/subforum?sub=" + str(parent.id) + "\">" + parent.title + "</a>")
+# 		parent = Subforum.query.filter(Subforum.id == parent.parent_id).first()
+# 	links.append("<a href=\"/\">Forum Index</a>")
+# 	link = ""
+# 	for l in reversed(links):
+# 		link = link + " / " + l
+# 	return link
 
 
 # Post validation helpers
