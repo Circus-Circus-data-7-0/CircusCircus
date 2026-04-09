@@ -14,7 +14,6 @@ fi
 pip install -r requirements.txt >/dev/null
 
 export SECRET_KEY="${SECRET_KEY:-kristofer}"
-export FLASK_APP=forum.app
 export PORT="${PORT:-8000}"
 
 # MySQL-only configuration.
