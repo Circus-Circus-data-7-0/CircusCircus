@@ -10,7 +10,6 @@ def create_app():
     app.register_blueprint(rt)
     # Set globals
     from .models import db
-    from .subforum import db
     db.init_app(app)
     
     with app.app_context():
