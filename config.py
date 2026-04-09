@@ -3,32 +3,49 @@ Flask configuration variables.
 This file stores all the settings Flask needs to run the app, including
 database connection details. It reads settings from environment variables,
 but has safe defaults if those variables aren't set.
+ 
+This file also does a small amount of startup work for MySQL so the app can
+try to prepare its database automatically before Flask builds tables.
 """
 from os import environ, path
 import pymysql
 
 basedir = path.abspath(path.dirname(__file__))
+# If we ever want to load a local .env file again, this is the place to do it.
+# It is left commented out because the project currently relies on environment
+# variables provided by the launcher script instead of a separate .env file.
+# from dotenv import load_dotenv
 # load_dotenv(path.join(basedir, '.env'))
 
 
 def try_admin_connection():
     """
-    Try to connect to MySQL as root using multiple methods.
-    Returns a tuple of (connection, method) if successful, or (None, None) if all fail.
-    
-    This tries:
-    1. Socket connection (Unix socket, no password needed on fresh installs)
-    2. TCP/IP localhost with no password
-    3. TCP/IP localhost with password from MYSQL_ROOT_PASSWORD env var
+    Try to connect to MySQL as the local admin user.
+
+    Why this exists:
+    - The app needs a way to create the database and app user on first run.
+    - On some machines MySQL allows local admin access through a socket.
+    - On other machines the root account may need a password.
+
+    What it returns:
+    - (connection, method) if one of the connection attempts worked.
+    - (None, None) if every attempt failed.
+
+    The function tries the most common local MySQL access paths first and only
+    falls back to a root password if the environment provides one.
     """
-    # Common socket locations on macOS
+    # Common socket locations on macOS.
+    # A socket connection is the most convenient option when MySQL is installed
+    # locally because it may work without needing a password at all.
     socket_paths = [
         "/tmp/mysql.sock",
         "/var/run/mysql/mysql.sock",
         "/usr/local/var/run/mysql.sock"
     ]
     
-    # Try socket connections first (no password needed on fresh installs)
+    # Try socket connections first.
+    # We stop at the first one that works because the exact socket path can
+    # vary depending on how MySQL was installed.
     for socket_path in socket_paths:
         try:
             admin_conn = pymysql.connect(
@@ -38,9 +55,12 @@ def try_admin_connection():
             )
             return (admin_conn, f"socket ({socket_path})")
         except Exception:
+            # If this socket does not exist or the server rejects the connection,
+            # we just move on to the next possible path.
             continue
     
-    # Try TCP/IP localhost with no password
+    # Try plain TCP/IP next.
+    # This is the simplest network-style connection to local MySQL.
     try:
         admin_conn = pymysql.connect(
             host="127.0.0.1",
@@ -53,7 +73,8 @@ def try_admin_connection():
     except Exception:
         pass
     
-    # Try TCP/IP with a password from environment variable (if user set one)
+    # If the machine has a root password, allow the launcher to supply it.
+    # This keeps the code flexible for teams with different MySQL setups.
     root_password = environ.get("MYSQL_ROOT_PASSWORD", "")
     if root_password:
         try:
@@ -66,30 +87,50 @@ def try_admin_connection():
             )
             return (admin_conn, "TCP/IP (with password)")
         except Exception:
+                # A password was provided, but it still did not work.
+                # The caller will handle the failure message.
             pass
     
-    # All connection methods failed
+            # If we get here, MySQL admin access is not available through any of the
+            # local methods we tried.
     return (None, None)
 
 
 def setup_database_and_user():
     """
-    Ensure the database and app user exist in MySQL.
-    This creates the database and app user during initial setup.
-    
-    Uses hardcoded 'root' for admin tasks and 'zipchat_app' for the app.
-    This keeps setup separate from app connection logic.
+        Ensure the database and app user exist in MySQL.
+
+        What this does:
+        - creates the database if it does not exist
+        - creates the app user if it does not exist
+        - grants the app user access to the database
+
+        Why it is here:
+        - A teammate should be able to run the app without manually preparing MySQL
+            every time.
+        - This is best-effort bootstrapping, not a replacement for proper database
+            administration in production.
+
+        Important detail:
+        - This function uses a local MySQL admin connection only for setup tasks.
+        - The actual app still connects as the normal application user.
     """
-    # Setup always creates these - don't read from environment for these
+        # These values define the default app database identity.
+        # We keep them simple and consistent so the launcher and config agree.
     app_user = "zipchat_app"
     app_password = "password"
     db_host = "127.0.0.1"
     db_name = "ZipChat"
     
-    # Try to connect as admin (root)
+        # Try to connect as the local MySQL admin user.
+        # If this fails, we can still continue later and let the normal app
+        # connection path explain what is missing.
     admin_conn, method = try_admin_connection()
     
     if admin_conn is None:
+                # We could not obtain admin access, so we cannot auto-create anything.
+                # The printed instructions are meant to tell a teammate exactly what to
+                # do next without having to inspect the code.
         print(f"\n⚠ Could not connect to MySQL as root")
         print(f"  Socket connection not available (fresh installs should have this)")
         print(f"  TCP/IP connection with no password didn't work either")
@@ -111,11 +152,15 @@ def setup_database_and_user():
         print(f"✓ Connected to MySQL as root via {method}")
         
         with admin_conn.cursor() as cursor:
-            # Create database
+            # Create the database if it does not already exist.
+            # Backticks around the name make the SQL a little safer if the
+            # database name ever contains special characters.
             cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{db_name}`;")
             print(f"  ✓ Database '{db_name}' ready")
             
-            # Create app user
+            # Create the application user.
+            # This is the user the Flask app itself will use during normal
+            # runtime, not the root/admin account.
             try:
                 cursor.execute(f"CREATE USER IF NOT EXISTS '{app_user}'@'{db_host}' IDENTIFIED BY '{app_password}';")
                 print(f"  ✓ App user '{app_user}' created")
@@ -125,7 +170,9 @@ def setup_database_and_user():
                 else:
                     raise
             
-            # Grant permissions
+            # Grant the app user permission to work only with this database.
+            # This keeps the account scoped to the project instead of giving it
+            # access to every database on the server.
             cursor.execute(f"GRANT ALL PRIVILEGES ON `{db_name}`.* TO '{app_user}'@'{db_host}';")
             cursor.execute("FLUSH PRIVILEGES;")
             print(f"  ✓ Permissions granted")
@@ -136,6 +183,8 @@ def setup_database_and_user():
         return True
         
     except Exception as e:
+        # If anything unexpected happens during setup, print the exception so a
+        # teammate can see what went wrong instead of getting a silent failure.
         print(f"⚠ Error during setup: {e}\n")
         admin_conn.close()
         return False
@@ -144,9 +193,14 @@ def setup_database_and_user():
 def check_mysql_connection():
     """
     Verify the app can connect using the configured app credentials.
-    Shows helpful errors if something is wrong.
+
+    This is the real runtime check for the Flask app.
+    If this succeeds, the database settings are good enough for normal use.
+    If it fails, we print a human-friendly explanation of the problem so the
+    user does not have to decode a long stack trace first.
     """
-    # App uses these (can override with environment variables)
+    # Read the values the actual Flask app will use.
+    # These can still be overridden from the environment when needed.
     app_user = environ.get("DB_USER", "zipchat_app")
     app_password = environ.get("DB_PASSWORD", "password")
     db_host = environ.get("DB_HOST", "127.0.0.1")
@@ -154,6 +208,8 @@ def check_mysql_connection():
     db_name = environ.get("DB_NAME", "ZipChat")
     
     try:
+        # This is the same style of connection SQLAlchemy will use when it
+        # creates tables and runs ORM queries.
         connection = pymysql.connect(
             host=db_host,
             port=db_port,
@@ -168,6 +224,8 @@ def check_mysql_connection():
         return True
         
     except pymysql.err.OperationalError as e:
+        # PyMySQL returns MySQL error codes, so we can match common failures and
+        # print a specific fix for each one.
         error_code = e.args[0] if e.args else None
         
         if error_code == 2003:
@@ -187,12 +245,23 @@ def check_mysql_connection():
             return False
             
         else:
+            # If we do not recognize the error code, still show the raw error so
+            # the team has something concrete to debug.
             print(f"❌ MySQL error ({error_code}): {e}\n")
             return False
 
 
 def check_mysql_and_setup():
-    """Initialize MySQL and check connection on app startup."""
+    """
+    Run the MySQL bootstrap sequence during app startup.
+
+    The order matters:
+    1. Try to create the database and app user.
+    2. Verify that the app can connect with the runtime credentials.
+
+    This function is intentionally small because it is called when the config
+    module is imported, so it should be easy to read and easy to debug.
+    """
     print("Checking MySQL setup...")
     setup_database_and_user()
     check_mysql_connection()
@@ -209,55 +278,67 @@ class Config:
       - DB_HOST: MySQL server address (default: "127.0.0.1")
       - DB_PORT: MySQL server port (default: "3306")
       - DB_NAME: Database name (default: "ZipChat")
+
+    The class is used by Flask-SQLAlchemy and the app factory, so keeping the
+    settings here makes startup predictable and easy to trace.
     """
     
     # ========== GENERAL SETTINGS ==========
-    # This is a secret key used to encrypt session data and CSRF tokens.
-    # In production, this should be a long random string, not hardcoded!
+    # SECRET_KEY signs Flask sessions and CSRF tokens.
+    # In a real deployment this should come from the environment, not be hard-
+    # coded in source control.
     SECRET_KEY = 'kristofer'
     
-    # Tell Flask which app module to use
+    # Flask can use this to know which module contains the app entry point.
     FLASK_APP = 'forum.app'
 
     
     # ========== DATABASE SETTINGS ==========
-    # All these settings can be overridden with environment variables.
-    # If not set, we use the defaults shown here.
+    # These values describe the database connection the application will use.
+    # Each one can be overridden from the shell, which keeps local development
+    # simple while still allowing other environments to customize the values.
     
-    # Username for MySQL (the app will connect as this user)
+    # Username for the MySQL account the app uses at runtime.
     DB_USER = environ.get("DB_USER", "zipchat_app")
     
-    # Password for that MySQL user
-    # Default is "password" - change this or set via environment variable
+    # Password for the runtime MySQL account.
+    # The launcher defaults to "password" so a new clone can start without
+    # asking the user to configure secrets first.
     DB_PASSWORD = environ.get("DB_PASSWORD", "password")
     
-    # Where MySQL is running (localhost = 127.0.0.1 on your own computer)
+    # Hostname or IP address where MySQL is running.
     DB_HOST = environ.get("DB_HOST", "127.0.0.1")
     
-    # Port MySQL listens on (3306 is the standard MySQL port)
+    # TCP port MySQL listens on.
     DB_PORT = environ.get("DB_PORT", "3306")
     
-    # Name of the database to use
+    # Name of the database the app reads and writes to.
     DB_NAME = environ.get("DB_NAME", "ZipChat")
 
-    # Build the full database URL that SQLAlchemy uses to connect
-    # Format: mysql+pymysql://username:password@host:port/database
-    # This tells Python how to connect to the MySQL database
+    # SQLAlchemy wants a single database URL instead of separate pieces.
+    # The format below means:
+    #   mysql+pymysql -> use MySQL with the PyMySQL driver
+    #   username      -> the runtime MySQL user
+    #   password      -> that user's password
+    #   host:port     -> where MySQL is listening
+    #   database      -> which schema to use
     SQLALCHEMY_DATABASE_URI = (
         f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
 
-    # SQLALCHEMY_ECHO prints SQL queries to the console (useful for debugging)
-    # Set to True if you want to see what SQL is being run
+    # When True, SQLAlchemy prints every SQL statement it sends to MySQL.
+    # This is useful for debugging but noisy for normal use, so we keep it off.
     SQLALCHEMY_ECHO = False
     
-    # SQLALCHEMY_TRACK_MODIFICATIONS is usually set to False for better performance
-    # It tells SQLAlchemy not to track every single change to objects
+    # This is usually False because it avoids extra bookkeeping overhead.
+    # Keeping it off makes the app lighter and is the normal Flask-SQLAlchemy
+    # setting for most projects.
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
-# Run the MySQL setup check when this config file is imported
-# This ensures MySQL is ready before the app tries to use it
+# Run the MySQL setup check as soon as config.py is imported.
+# That means the app gets a chance to prepare MySQL before Flask starts using
+# the database for table creation and queries.
 try:
     check_mysql_and_setup()
 except Exception as e:
