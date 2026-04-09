@@ -13,7 +13,6 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     subforum_id = db.Column(db.Integer, db.ForeignKey('subforum.id'), nullable=True)
     parent_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True)
-    private = db.Column(db.Boolean, default=False)
     replies = db.relationship("Post", backref=db.backref('parent_post', remote_side='Post.id'))
 
     # Simple in-memory cache for human-readable time labels.

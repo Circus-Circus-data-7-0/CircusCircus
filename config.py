@@ -11,7 +11,7 @@ class Config:
     # General Config
     SECRET_KEY = 'kristofer'
     FLASK_APP = 'forum.app'
-    UPLOAD_FOLDER = 'forum/static/uploads'
+    UPLOAD_FOLDER = path.join(basedir, 'forum', 'static', 'uploads')
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'webm'}
 
     # Database
