@@ -3,9 +3,10 @@ from flask_login import current_user, login_user, logout_user
 from flask_login.utils import login_required
 import datetime
 from flask import Blueprint, render_template, request, redirect, url_for
-from .models import User, Post, Comment, valid_content, valid_title, db, error
+from .models import User, valid_content, valid_title, db, error
+from .post import Post
+from .subforum import Subforum, generateLinkPath
 from .user import username_taken, email_taken, valid_username
-from .subforum import Subforum, db, generateLinkPath
 
 # Route handlers for login, browsing, and content creation.
 # The app is small enough to keep in one blueprint for now.
