@@ -1,6 +1,6 @@
 from flask import Flask
 from .routes import rt
-from .subforum_route import subforum_rt
+from .subforum import subforum_rt
 
 def create_app():
     """Construct the core application."""
