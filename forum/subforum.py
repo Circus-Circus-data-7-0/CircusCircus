@@ -1,4 +1,5 @@
-from .models import db, Post, valid_content, valid_title, error
+from .models import db, valid_content, valid_title, error
+from .post import Post
 
 class Subforum(db.Model):
     # Represent a forum category and its optional child subforums.
@@ -46,7 +47,6 @@ def valid_content(content):
 from flask import Blueprint, render_template, request, redirect
 from flask_login import current_user, login_required
 from flask_login.utils import login_required
-from .models import Post, valid_content, valid_title
 
 # Route handlers for login, browsing, and content creation.
 # The app is small enough to keep in one blueprint for now.

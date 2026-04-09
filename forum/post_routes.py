@@ -2,11 +2,13 @@ from flask import Blueprint, render_template, request, redirect, url_for, curren
 from flask_login import current_user, login_user, logout_user
 from flask_login.utils import login_required
 import datetime
-from .models import User, Post, Subforum, valid_content, valid_title, db, generateLinkPath, error
+from .models import User, valid_content, valid_title, db, error
 from .user import username_taken, email_taken, valid_username
 from .routes import rt
 import os
 from werkzeug.utils import secure_filename
+from .post import Post
+from .subforum import Subforum
 
 
 @rt.route('/uploads/<filename>')
