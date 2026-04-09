@@ -1,7 +1,11 @@
-# export PORT=5006
+#!/bin/bash
 export SECRET_KEY="kristofer"
-# honcho start
 
-# you can ALSO or RATHER use the following command to run the app
-export FLASK_APP=forum.app
-flask run --port 8000
+if [ "$1" = "--server" ]; then
+    cd ./forum && flask run --host=0.0.0.0 --port=8000
+else
+    cd ./forum && flask run --port=8000
+fi
+
+# To run the server, use: ./run.sh --server
+# To run the server in development mode, use: ./run.sh

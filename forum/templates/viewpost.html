@@ -16,6 +16,16 @@
 	<div class="postcontent">
 		{{post.content}}
 	</div>
+	{% if post.upload_file %}
+		{% if post.upload_file.endswith(('.mp4', 'mov', '.webm')) %}
+			<video controls>
+				<source src="/uploads/{{ post.upload_file }}">
+			</video>
+		{% else %}
+			<img src="/uploads/{{ post.upload_file }}">
+		{% endif %}
+	{% endif %}
+			
 
 </div>
 <div class="addcomment" id="addcomment">
