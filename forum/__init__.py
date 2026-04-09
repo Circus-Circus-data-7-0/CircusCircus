@@ -1,5 +1,6 @@
 from flask import Flask
 from .routes import rt
+from .post_routes import rt    
 from .subforum import subforum_rt
 
 def create_app():
