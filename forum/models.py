@@ -12,9 +12,9 @@ db = SQLAlchemy()
 class User(UserMixin, db.Model):
     # Store account information and ownership of posts/comments.
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.Text, unique=True)
-    password_hash = db.Column(db.Text)
-    email = db.Column(db.Text, unique=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False)
     admin = db.Column(db.Boolean, default=False)
     posts = db.relationship("Post", backref="user")
 
@@ -51,7 +51,7 @@ from .post import Post  # noqa: E402
 class Post(db.Model):
     # Store one forum post and link it to a user and subforum.
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.Text)
+    title = db.Column(db.String(140), nullable=False)
     content = db.Column(db.Text)
     comments = db.relationship("Comment", backref="post")
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -109,7 +109,7 @@ class Post(db.Model):
 class Comment(db.Model):
     # Store a comment attached to a post and authored by a user.
     id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.Text)
+    content = db.Column(db.Text, nullable=False)
     postdate = db.Column(db.DateTime)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
