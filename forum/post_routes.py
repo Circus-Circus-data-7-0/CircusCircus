@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, current_app, send_from_directory
 from flask_login import current_user, login_user, logout_user
 from flask_login.utils import login_required
 import datetime
@@ -8,6 +8,10 @@ from .routes import rt
 import os
 from werkzeug.utils import secure_filename
 
+
+@rt.route('/uploads/<filename>')
+def uploaded_file(filename):
+	return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
 
 @rt.route('/addpost')
 @login_required
