@@ -1,4 +1,5 @@
 # CircusCircus
+
 This is a minimal forum written in python with Flask. It supports only the bare minumum of features to allow discussions, including user accounts, threads, and comments.
 
 On first run, the default subforums will be created. Although custom subforums are not supported through any user interface, it is possible to modify forum/setup.py to create custom subforums.
@@ -46,10 +47,10 @@ This currently puts a sqlite3 db in the /tmp directory.
 (use atleast python 3.11)
 
 ```
-$ python3.11 -m venv venv
-$ source venv/bin/activate
-$ pip install -r requirements.txt
-$ ./run.sh
+python3.11 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+./run.sh
 ```
 
 and it should appear on port 5000

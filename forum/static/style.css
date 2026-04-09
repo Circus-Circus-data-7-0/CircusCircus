@@ -41,6 +41,15 @@
 	padding-left: 0.5%;
 	font-size: 12pt;
 }
+.adminusername{
+	color: red;
+}
+.centertext{
+	text-align: center;
+}
+.comment-submit{
+	margin-bottom: 1%;
+}
 .postsubmit{
 	margin-left: auto;
 	margin-right: auto;
