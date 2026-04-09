@@ -9,8 +9,8 @@ from .models import User, Post, Comment, valid_content, valid_title, db, error, 
 # The app is small enough to keep in one blueprint for now.
 
 from .routes import rt
-
-@rt.route('/subforum')
+subforum_rt = Blueprint('subforum_routes', __name__, template_folder='templates')
+@subforum_rt.route('/subforum')
 def subforum():
 	# Show one subforum, its posts, and its child subforums.
 	subforum_id = int(request.args.get("sub"))
@@ -24,7 +24,7 @@ def subforum():
 	return render_template("subforum.html", subforum=subforum, posts=posts, subforums=subforums, path=subforumpath)
 
 #@login_required
-@rt.route('/createsubforum', methods=['GET', 'POST'])
+@subforum_rt.route('/createsubforum', methods=['GET', 'POST'])
 def create_subforum_page():
 	# Only admins can create subforums.
 	if not current_user.admin:
@@ -78,7 +78,7 @@ def create_subforum_page():
 	return render_template("createsubforum.html", subforums=subforums, parent_subforum=parent_subforum)
 
 @login_required
-@rt.route('/deletesubforum', methods=['POST'])
+@subforum_rt.route('/deletesubforum', methods=['POST'])
 def delete_subforum():
 	# Only admins can delete subforums.
 	if not current_user.admin:
