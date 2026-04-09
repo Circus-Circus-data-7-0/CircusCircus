@@ -8,7 +8,7 @@ from .routes import rt
 import os
 from werkzeug.utils import secure_filename
 from .post import Post
-from .subforum import Subforum
+from .subforum import Subforum, generateLinkPath
 
 
 @rt.route('/uploads/<filename>')
