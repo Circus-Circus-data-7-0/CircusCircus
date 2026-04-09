@@ -15,4 +15,10 @@
 </div>
 </div>
 {% endfor %}
+
+<div class="subforumheaderlink">
+	{% if current_user.is_authenticated and current_user.admin %}
+	<a href="/createsubforum">Create a new forum</a>
+	{% endif %}
+</div>
 {% endblock %}
