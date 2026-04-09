@@ -30,6 +30,8 @@ def viewpost():
 	post = Post.query.filter(Post.id == postid).first()
 	if not post:
 		return error("That post does not exist!")
+	if post.private and (not current_user.is_authenticated or post.user_id != current_user.id):
+		return error("This post is private.")
 	subforumpath = post.subforum.path or generateLinkPath(post.subforum.id)
 	# Newest replies appear first for easier reading.
 	comments = Post.query.filter(Post.parent_id == postid).order_by(Post.id.desc())
@@ -73,12 +75,13 @@ def action_post():
 		retry = True
 	if retry:
 		return render_template("createpost.html", subforum=subforum, errors=errors)
+	private = 'private' in request.form
 	file = request.files.get('upload_file')
 	filename = None
 	if file and file.filename:
 		filename = secure_filename(file.filename)
 		file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-	post = Post(title=title, content=content, postdate=datetime.datetime.now(), upload_file=filename)
+	post = Post(title=title, content=content, postdate=datetime.datetime.now(), upload_file=filename, private=private)
 	subforum.posts.append(post)
 	user.posts.append(post)
 	db.session.commit()
