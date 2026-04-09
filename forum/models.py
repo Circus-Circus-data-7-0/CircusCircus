@@ -8,8 +8,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-from .subforum import Subforum, generateLinkPath
-
 # Database models
 class User(UserMixin, db.Model):
     # Store account information and ownership of posts/comments.
