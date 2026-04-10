@@ -127,7 +127,9 @@ def action_post():
 	filename = None
 	if file and file.filename:
 		filename = secure_filename(file.filename)
-		file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+		upload_folder = current_app.config['UPLOAD_FOLDER']
+		os.makedirs(upload_folder, exist_ok=True)
+		file.save(os.path.join(upload_folder, filename))
 	post = Post(title=title, content=content, postdate=datetime.datetime.now(), upload_file=filename, private=private)
 	subforum.posts.append(post)
 	user.posts.append(post)
