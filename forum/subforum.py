@@ -57,11 +57,14 @@ subforum_rt = Blueprint('subforum_routes', __name__, template_folder='templates'
 @subforum_rt.route('/subforum')
 def subforum():
 	# Show one subforum, its posts, and its child subforums.
-	subforum_id = int(request.args.get("sub"))
+	subforum_id = request.args.get("sub", type=int)
 	subforum = Subforum.query.filter(Subforum.id == subforum_id).first()
 	if not subforum:
 		return error("That subforum does not exist!")
-	posts = Post.query.filter(Post.subforum_id == subforum_id).order_by(Post.id.desc()).limit(50)
+	posts = Post.query.filter(
+		Post.subforum_id == subforum_id,
+		(Post.private == False) | (Post.user_id == current_user.id if current_user.is_authenticated else False)
+	).order_by(Post.id.desc()).limit(50)
 	subforumpath = subforum.path or generateLinkPath(subforum.id)
 
 	subforums = Subforum.query.filter(Subforum.parent_id == subforum_id).all()
@@ -128,7 +131,7 @@ def delete_subforum():
 	if not current_user.admin:
 		return Subforum.error("Only administrators can delete subforums!")
 	
-	subforum_id = int(request.form.get('subforum_id'))
+	subforum_id = request.form.get('subforum_id', type=int)
 	subforum = Subforum.query.get(subforum_id)
 	
 	if not subforum:

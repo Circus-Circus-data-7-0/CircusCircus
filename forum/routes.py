@@ -66,21 +66,21 @@ def action_createaccount():
 	return redirect("/")
 
 
-@rt.route('/subforum')
-def subforum():
-	# Show one subforum, its posts, and its child subforums.
-	subforum_id = int(request.args.get("sub"))
-	subforum = Subforum.query.filter(Subforum.id == subforum_id).first()
-	if not subforum:
-		return error("That subforum does not exist!")
-	posts = Post.query.filter(
-		Post.subforum_id == subforum_id,
-		(Post.private == False) | (Post.user_id == current_user.id if current_user.is_authenticated else False)
-	).order_by(Post.id.desc()).limit(50)
-	subforumpath = subforum.path or generateLinkPath(subforum.id)
+# @rt.route('/subforum')
+# def subforum():
+# 	# Show one subforum, its posts, and its child subforums.
+# 	subforum_id = int(request.args.get("sub"))
+# 	subforum = Subforum.query.filter(Subforum.id == subforum_id).first()
+# 	if not subforum:
+# 		return error("That subforum does not exist!")
+# 	posts = Post.query.filter(
+# 		Post.subforum_id == subforum_id,
+# 		(Post.private == False) | (Post.user_id == current_user.id if current_user.is_authenticated else False)
+# 	).order_by(Post.id.desc()).limit(50)
+# 	subforumpath = subforum.path or generateLinkPath(subforum.id)
 
-	subforums = Subforum.query.filter(Subforum.parent_id == subforum_id).all()
-	return render_template("subforum.html", subforum=subforum, posts=posts, subforums=subforums, path=subforumpath)
+# 	subforums = Subforum.query.filter(Subforum.parent_id == subforum_id).all()
+# 	return render_template("subforum.html", subforum=subforum, posts=posts, subforums=subforums, path=subforumpath)
 
 @rt.route('/loginform')
 def loginform():
