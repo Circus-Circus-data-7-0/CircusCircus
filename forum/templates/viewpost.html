@@ -25,10 +25,20 @@
 		{% else %}
 			<img src="/uploads/{{ post.upload_file }}">
 		{% endif %}
-	{% endif %}
-			
-
+	{% endif %}	
 </div>
+
+<form method="POST" action="/action_react" style="display:inline">
+  <input type="hidden" name="post_id" value="{{ post.id }}">
+  {% for emoji, kind in [('👍', 'up'), ('👎', 'down'), ('❤️', 'heart')] %}
+    {% set count = post.reactions | selectattr('kind', 'eq', kind) | list | length %}
+    {% set reacted = current_user.is_authenticated and post.reactions | selectattr('kind','eq',kind) | selectattr('user_id','eq',current_user.id) | list %}
+    <button name="kind" value="{{ kind }}" style="background:{{ '#eee' if reacted else 'none' }};border:1px solid #ccc;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:14pt;">
+      {{ emoji }} {{ count }}
+    </button>
+  {% endfor %}
+</form>
+
 <div class="addcomment" id="addcomment">
 	<form action="/action_comment?post={{ post.id }}" method="POST">
 		<textarea class="inputbox varwidth" rows="6" name="content" placeholder="Write your comment here"></textarea><br>
