@@ -2,8 +2,6 @@
 
 from os import environ, path
 
-import pymysql
-
 basedir = path.abspath(path.dirname(__file__))
 
 
