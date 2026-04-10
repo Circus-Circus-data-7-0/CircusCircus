@@ -1,6 +1,6 @@
 from flask import Flask
 from .routes import rt
-from .post_routes import rt    
+from .post import post_rt
 from .subforum import subforum_rt
 from .Reactions import rt_react
 
@@ -14,6 +14,7 @@ def create_app():
     # etc
     # Register the main routes blueprint.
     app.register_blueprint(rt)
+    app.register_blueprint(post_rt)
     app.register_blueprint(subforum_rt)
     app.register_blueprint(rt_react)
     # Set globals
