@@ -28,7 +28,18 @@
 	
 	<div class="subforumheaderlink">
 	{% if current_user.is_authenticated %}
+	{% if current_user.admin %}
+	<a href="/createsubforum?parent={{ subforum.id }}">Create a subforum in <b>{{ subforum.title }}</b></a> | 
 	<a href="/addpost?sub={{ subforum.id }}">Create a post in <b>{{ subforum.title }}</b></a>
+	{% if not subforum.protected %}
+	| <form style="display: inline;" method="POST" action="/deletesubforum" onsubmit="return confirm('Are you sure you want to delete this subforum?');">
+		<input type="hidden" name="subforum_id" value="{{ subforum.id }}">
+		<input type="submit" value="Delete Subforum" style="background: none; border: none; color: #0066cc; cursor: pointer; text-decoration: underline; padding: 0; font: inherit;">
+	</form>
+	{% endif %}
+	{% else %}
+	<a href="/addpost?sub={{ subforum.id }}">Create a post in <b>{{ subforum.title }}</b></a>
+	{% endif %}
 	{% else %}
 	<a href="/loginform">Log in or create an account to make a post in <b>{{ subforum.title }}</b></a>
 	{% endif %}
@@ -47,7 +58,7 @@
 		<a href="/viewpost?post={{ post.id }}">{{ post.title }}</a>
 		</div>
 		<div class="postusername">
-			by <b {% if post.user.admin %} style="color: red;" {% endif %}> {{post.user.username}}</b>
+			by <b class="{% if post.user.admin %}adminusername{% endif %}"> {{post.user.username}}</b>
 			<div class="date">
 			{{ post.get_time_string() }}
 			</div>

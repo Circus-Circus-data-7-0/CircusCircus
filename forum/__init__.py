@@ -17,7 +17,7 @@ def create_app():
     db.init_app(app)
     
     with app.app_context():
-        # Add some routes
+        # Create tables on startup so the app can run against a fresh database.
         db.create_all()
         return app
 

@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="postsubmit">
+	<h2>{% if parent_subforum %}Create a Subforum in {{ parent_subforum.title }}{% else %}Create a New Forum{% endif %}</h2>
+	
+	<form action="/createsubforum{% if parent_subforum %}?parent={{ parent_subforum.id }}{% endif %}" method="POST">
+		
+		<label for="title">{% if parent_subforum %}Subforum{% else %}Forum{% endif %} Title:</label><br>
+		<input class="inputbox" size="100" type="text" placeholder="Title" name="title" required><br><br>
+		
+		<label for="description">Description:</label><br>
+		<textarea class="inputbox" rows="8" cols="100" name="description" placeholder="Describe this forum"></textarea><br><br>
+		
+		{% if not parent_subforum %}
+		<label for="parent_id">Parent Forum (optional):</label><br>
+		<select class="inputbox" name="parent_id">
+			<option value="">None (Top-level forum)</option>
+			{% for subforum in subforums %}
+				<option value="{{ subforum.id }}">{{ subforum.title }}</option>
+			{% endfor %}
+		</select><br><br>
+		{% else %}
+		<input type="hidden" name="parent_id" value="{{ parent_subforum.id }}">
+		{% endif %}
+		
+		<input class="inputbox" type="submit" value="Create">
+	</form>
+</div>
+
+{% endblock %}
