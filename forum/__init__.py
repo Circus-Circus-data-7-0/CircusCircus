@@ -2,6 +2,7 @@ from flask import Flask
 from .routes import rt
 from .post import post_rt
 from .subforum import subforum_rt
+from .Reactions import rt_react
 
 def create_app():
     """Construct the core application."""
@@ -15,6 +16,7 @@ def create_app():
     app.register_blueprint(rt)
     app.register_blueprint(post_rt)
     app.register_blueprint(subforum_rt)
+    app.register_blueprint(rt_react)
     # Set globals
     from .models import db
     db.init_app(app)

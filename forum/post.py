@@ -24,7 +24,8 @@ class Post(db.Model):
     subforum_id = db.Column(db.Integer, db.ForeignKey('subforum.id'), nullable=True)
     parent_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=True)
     replies = db.relationship("Post", backref=db.backref('parent_post', remote_side='Post.id'))
-
+    reactions = db.relationship('Reaction', backref='post')
+    
     # Simple in-memory cache for human-readable time labels.
     lastcheck = None
     savedresponse = None
