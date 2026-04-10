@@ -1,6 +1,10 @@
 venv/
 .vscode
 
+# Uploaded user files — kept locally only, not committed
+forum/static/uploads/*
+!forum/static/uploads/.gitkeep
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
