@@ -1,49 +1,61 @@
-import re
-from user.models.user import User
-
-# -------------------------
-# Regex Validation Rules
-# -------------------------
-
-password_regex = re.compile(r"^[a-zA-Z0-9!@#%&]{6,40}$")
-username_regex = re.compile(r"^[a-zA-Z0-9!@#%&]{4,40}$")
-email_regex = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+from typing import Optional, Tuple
+from models.user import User
+from utils.validators import valid_username, valid_password, valid_email
 
 
 # -------------------------
-# Validation Functions
+# Database Checks
 # -------------------------
 
-def valid_username(username):
-    return bool(username_regex.match(username))
+def username_taken(db_session, username: str) -> bool:
+    return db_session.query(User).filter(User.username == username).first() is not None
 
 
-def valid_password(password):
-    return bool(password_regex.match(password))
-
-
-def valid_email(email):
-    return bool(email_regex.match(email))
+def email_taken(db_session, email: str) -> bool:
+    return db_session.query(User).filter(User.email == email).first() is not None
 
 
 # -------------------------
-# Account Creation
+# User Registration Service
 # -------------------------
 
-def register_user(user_id, username, password, email, privacy="public"):
+def register_user(
+    db_session,
+    user_id: int,
+    username: str,
+    password: str,
+    email: str,
+    privacy: str = "public"
+) -> Tuple[Optional[User], Optional[str]]:
+    """
+    Creates a new user with validation and DB checks.
+
+    Returns:
+        (User, None) on success
+        (None, error_message) on failure
+    """
+
+    # --- Validation ---
     if not valid_username(username):
-        return "Invalid username"
+        return None, "Invalid username"
 
     if not valid_password(password):
-        return "Invalid password"
+        return None, "Invalid password"
 
     if not valid_email(email):
-        return "Invalid email"
+        return None, "Invalid email"
 
-    if privacy not in ["public", "private"]:
-        return "Invalid privacy setting"
+    if privacy not in ["public", "private", "friends"]:
+        return None, "Invalid privacy setting"
 
-    # Create user object
+    # --- Uniqueness Checks ---
+    if username_taken(db_session, username):
+        return None, "Username already taken"
+
+    if email_taken(db_session, email):
+        return None, "Email already in use"
+
+    # --- Create User ---
     new_user = User(
         id=user_id,
         username=username,
@@ -52,7 +64,12 @@ def register_user(user_id, username, password, email, privacy="public"):
         privacy=privacy
     )
 
+    # --- Default Permissions ---
     new_user.add_permission("post:create")
     new_user.add_permission("comment:create")
 
-    return new_user
+    # --- Persist to DB ---
+    db_session.add(new_user)
+    db_session.commit()
+
+    return new_user, None
