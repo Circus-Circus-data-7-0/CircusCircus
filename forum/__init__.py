@@ -1,6 +1,6 @@
 from flask import Flask
 from .routes import rt
-from .post_routes import rt    
+from .post import post_rt
 from .subforum import subforum_rt
 
 def create_app():
@@ -13,6 +13,7 @@ def create_app():
     # etc
     # Register the main routes blueprint.
     app.register_blueprint(rt)
+    app.register_blueprint(post_rt)
     app.register_blueprint(subforum_rt)
     # Set globals
     from .models import db
