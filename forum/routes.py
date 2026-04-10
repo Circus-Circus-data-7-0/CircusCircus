@@ -4,8 +4,9 @@ from flask_login.utils import login_required
 import datetime
 from flask import Blueprint, render_template, request, redirect, url_for
 from .models import User, valid_content, valid_title, db, error
+from .post import Post
+from .subforum import Subforum, generateLinkPath
 from .user import username_taken, email_taken, valid_username
-from .subforum import Subforum, db, generateLinkPath
 
 # Route handlers for login, browsing, and content creation.
 # The app is small enough to keep in one blueprint for now.
@@ -71,7 +72,10 @@ def action_createaccount():
 # 	subforum = Subforum.query.filter(Subforum.id == subforum_id).first()
 # 	if not subforum:
 # 		return error("That subforum does not exist!")
-# 	posts = Post.query.filter(Post.subforum_id == subforum_id).order_by(Post.id.desc()).limit(50)
+# 	posts = Post.query.filter(
+# 		Post.subforum_id == subforum_id,
+# 		(Post.private == False) | (Post.user_id == current_user.id if current_user.is_authenticated else False)
+# 	).order_by(Post.id.desc()).limit(50)
 # 	subforumpath = subforum.path or generateLinkPath(subforum.id)
 
 # 	subforums = Subforum.query.filter(Subforum.parent_id == subforum_id).all()

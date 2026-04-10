@@ -27,7 +27,6 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         # Compare a password guess against the stored hash.
         return check_password_hash(self.password_hash, password)
-    
 
 # Post is defined in post.py; imported here after db is ready to avoid
 # circular imports while keeping Post in its own module.

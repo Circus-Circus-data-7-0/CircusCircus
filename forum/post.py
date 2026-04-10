@@ -8,6 +8,7 @@ class Post(db.Model):
     title = db.Column(db.Text, nullable=True)
     upload_file = db.Column(db.String(255), nullable=True)
     content = db.Column(db.Text)
+    private = db.Column(db.Boolean, default=False)
     postdate = db.Column(db.DateTime)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     subforum_id = db.Column(db.Integer, db.ForeignKey('subforum.id'), nullable=True)
@@ -18,11 +19,12 @@ class Post(db.Model):
     lastcheck = None
     savedresponse = None
 
-    def __init__(self, title=None, content=None, postdate=None, upload_file=None):
+    def __init__(self, title=None, content=None, postdate=None, upload_file=None, private=False):
         self.title = title
         self.content = content
         self.postdate = postdate
         self.upload_file = upload_file
+        self.private = private
 
     def get_time_string(self):
        # Recalculate every 30 seconds to avoid inaccurate time labels
