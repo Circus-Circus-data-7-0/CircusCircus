@@ -12,9 +12,9 @@ db = SQLAlchemy()
 class User(UserMixin, db.Model):
     # Store account information and ownership of posts/comments.
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.Text, unique=True)
-    password_hash = db.Column(db.Text)
-    email = db.Column(db.Text, unique=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False)
     admin = db.Column(db.Boolean, default=False)
     posts = db.relationship("Post", backref="user")
 
@@ -28,9 +28,103 @@ class User(UserMixin, db.Model):
         # Compare a password guess against the stored hash.
         return check_password_hash(self.password_hash, password)
 
+# Post is defined in post.py; imported here after db is ready to avoid
+# circular imports while keeping Post in its own module.
+# from .post import Post  # noqa: E402
+# class Post(db.Model):
+#     # Store one forum post and link it to a user and subforum.
+#     id = db.Column(db.Integer, primary_key=True)
+#     title = db.Column(db.String(140), nullable=False)
+#     content = db.Column(db.Text)
+#     comments = db.relationship("Comment", backref="post")
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+#     subforum_id = db.Column(db.Integer, db.ForeignKey('subforum.id'))
+#     postdate = db.Column(db.DateTime)
 
-# Post is defined in post.py and imported by routes directly.
-# Subforum is defined in subforum.py.
+#     # Simple in-memory cache for human-readable time labels.
+#     lastcheck = None
+#     savedresponce = None
+
+#     def __init__(self, title, content, postdate):
+#         self.title = title
+#         self.content = content
+#         self.postdate = postdate
+
+#     def get_time_string(self):
+#         # Only recalculate the label every 30 seconds.
+#         now = datetime.datetime.now()
+#         if self.lastcheck is None or (now - self.lastcheck).total_seconds() > 30:
+#             self.lastcheck = now
+#         else:
+#             return self.savedresponce
+
+#         diff = now - self.postdate
+
+#         seconds = diff.total_seconds()
+#         if seconds / (60 * 60 * 24 * 30) > 1:
+#             self.savedresponce =  " " + str(int(seconds / (60 * 60 * 24 * 30))) + " months ago"
+#         elif seconds / (60 * 60 * 24) > 1:
+#             self.savedresponce =  " " + str(int(seconds / (60*  60 * 24))) + " days ago"
+#         elif seconds / (60 * 60) > 1:
+#             self.savedresponce = " " + str(int(seconds / (60 * 60))) + " hours ago"
+#         elif seconds / (60) > 1:
+#             self.savedresponce = " " + str(int(seconds / 60)) + " minutes ago"
+#         else:
+#             self.savedresponce =  "Just a moment ago!"
+
+#         return self.savedresponce
+
+# class Subforum(db.Model):
+#     # Represent a forum category and its optional child subforums.
+#     id = db.Column(db.Integer, primary_key=True)
+#     title = db.Column(db.Text, unique=True)
+#     description = db.Column(db.Text)
+#     subforums = db.relationship("Subforum")
+#     parent_id = db.Column(db.Integer, db.ForeignKey('subforum.id'))
+#     posts = db.relationship("Post", backref="subforum")
+#     path = None
+#     hidden = db.Column(db.Boolean, default=False)
+
+#     def __init__(self, title, description):
+#         self.title = title
+#         self.description = description
+
+# class Comment(db.Model):
+#     # Store a comment attached to a post and authored by a user.
+#     id = db.Column(db.Integer, primary_key=True)
+#     content = db.Column(db.Text, nullable=False)
+#     postdate = db.Column(db.DateTime)
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+#     post_id = db.Column(db.Integer, db.ForeignKey("post.id"))
+
+#     lastcheck = None
+#     savedresponce = None
+
+#     def __init__(self, content, postdate):
+#         self.content = content
+#         self.postdate = postdate
+
+#     def get_time_string(self):
+#         # Only recalculate the label every 30 seconds.
+#         now = datetime.datetime.now()
+#         if self.lastcheck is None or (now - self.lastcheck).total_seconds() > 30:
+#             self.lastcheck = now
+#         else:
+#             return self.savedresponce
+
+#         diff = now - self.postdate
+#         seconds = diff.total_seconds()
+#         if seconds / (60 * 60 * 24 * 30) > 1:
+#             self.savedresponce =  " " + str(int(seconds / (60 * 60 * 24 * 30))) + " months ago"
+#         elif seconds / (60 * 60 * 24) > 1:
+#             self.savedresponce =  " " + str(int(seconds / (60*  60 * 24))) + " days ago"
+#         elif seconds / (60 * 60) > 1:
+#             self.savedresponce = " " + str(int(seconds / (60 * 60))) + " hours ago"
+#         elif seconds / (60) > 1:
+#             self.savedresponce = " " + str(int(seconds / 60)) + " minutes ago"
+#         else:
+#             self.savedresponce =  "Just a moment ago!"
+#         return self.savedresponce
 
 def error(errormessage):
 	return "<b style=\"color: red;\">" + errormessage + "</b>"

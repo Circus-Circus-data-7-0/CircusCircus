@@ -4,7 +4,7 @@ from .post import Post
 class Subforum(db.Model):
     # Represent a forum category and its optional child subforums.
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.Text, unique=True)
+    title = db.Column(db.String(255), unique=True)
     description = db.Column(db.Text)
     subforums = db.relationship("Subforum")
     parent_id = db.Column(db.Integer, db.ForeignKey('subforum.id'))
@@ -47,8 +47,6 @@ def valid_content(content):
 from flask import Blueprint, render_template, request, redirect
 from flask_login import current_user, login_required
 from flask_login.utils import login_required
-from .models import valid_content, valid_title
-from .post import Post
 
 # Route handlers for login, browsing, and content creation.
 # The app is small enough to keep in one blueprint for now.

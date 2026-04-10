@@ -27,7 +27,6 @@ def action_login():
 		return render_template("login.html", errors=errors)
 	return redirect("/")
 
-
 @login_required
 @rt.route('/action_logout')
 def action_logout():
