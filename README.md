@@ -10,7 +10,7 @@ On first run, the default subforums will be created. Although custom subforums a
 - clone/branch from group's org's repo.
 - maintain two branches,`main` & `dev` (plus a different branch for each group member)
 
-## Features to Add
+## Features to Add 
 
 - divide `forum.py` into multiple modules (eg. `posts`, `comments`, `auth (login etc)`)
 - migrate from sqlite3 to MySQL

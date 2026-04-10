@@ -15,15 +15,60 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.Text)
     email = db.Column(db.Text, unique=True)
     admin = db.Column(db.Boolean, default=False)
+    permissions_raw = db.Column(db.Text, default="")
+    privacy = db.Column(db.Text, default="public")
     posts = db.relationship("Post", backref="user")
     comments = db.relationship("Comment", backref="user")
 
-    def __init__(self, email, username, password):
+    def __init__(self, email, username, password, privacy="public", permissions=None):
         self.email = email
         self.username = username
+        self.set_password(password)
+        self.privacy = privacy
+        self.permissions = permissions or []
+
+    @property
+    def password(self):
+        # Passwords are write-only and stored as a hash.
+        raise AttributeError("password is write-only")
+
+    @password.setter
+    def password(self, password):
+        self.set_password(password)
+
+    def set_password(self, password):
         self.password_hash = generate_password_hash(password)
+
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    @property
+    def permissions(self):
+        if not self.permissions_raw:
+            return []
+        return [perm for perm in self.permissions_raw.split(",") if perm]
+
+    @permissions.setter
+    def permissions(self, permissions):
+        deduped = list(dict.fromkeys(permissions))
+        self.permissions_raw = ",".join(deduped)
+
+    def add_permission(self, permission):
+        perms = self.permissions
+        if permission not in perms:
+            perms.append(permission)
+            self.permissions = perms
+
+    def has_permission(self, permission):
+        return self.admin or permission in self.permissions
+
+    @property
+    def post_fk(self):
+        return [post.id for post in self.posts if post.id is not None]
+
+    @property
+    def comments_fk(self):
+        return [comment.id for comment in self.comments if comment.id is not None]
     
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
