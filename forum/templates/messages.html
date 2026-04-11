@@ -1,11 +1,16 @@
 {% extends 'layout.html' %}
 {% block body %}
-<form method="POST" action="/action_message">
-  <input type="text" name="recipient" id="recipient" placeholder="Username">
-  <textarea name="content" rows="4" cols="60"></textarea>
-  <input type="submit" value="Send">
-</form>
-<div style="margin-top:1%;margin-bottom:0.5%;">
+<div class="message-compose">
+  <form method="POST" action="/action_message">
+    <input type="text" name="recipient" id="recipient" placeholder="Username">
+    <textarea name="content" rows="4" cols="60"></textarea>
+    <input type="submit" value="Send">
+  </form>
+  {% if request.args.get('error') %}
+  <p style="color:red;">{{ request.args.get('error') }}</p>
+  {% endif %}
+</div>
+<div class="message-filter">
   <b>Filter by sender:</b>
   <select onchange="window.location='/messages?sender='+this.value">
     <option value="">All</option>

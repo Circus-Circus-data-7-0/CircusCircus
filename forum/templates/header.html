@@ -1,10 +1,13 @@
-<a href="/" id="nolinks"><b>{{ config.SITE_NAME }}</b></a>{% if config.SITE_DESCRIPTION %} - {% endif %} <i>{{ config.SITE_DESCRIPTION }}</i>
-<div class="login">
-	{% if current_user.is_authenticated %}
-	<b class="{% if current_user.admin %}adminusername{% endif %}">{{ current_user.username }}</b>
-	<a class="logoutlink" href="/action_logout">(logout)</a>
-	<a class="logoutlink" href="/messages">(messages)</a>
-	{% else %}
-	<a href="/loginform">Click here to login or register!</a>
-	{% endif %}
+<a href="/" class="zc-logo">
+    <div class="zc-logo-icon">S</div>
+    <div class="zc-logo-text">{{ config.SITE_NAME }}<span>.</span></div>
+</a>
+<div class="zc-nav-right">
+    {% if current_user.is_authenticated %}
+    <span class="zc-nav-user {% if current_user.admin %}adminusername{% endif %}">{{ current_user.username }}</span>
+    <a class="zc-nav-link" href="/messages">Messages</a>
+    <a class="zc-nav-link" href="/action_logout">Logout</a>
+    {% else %}
+    <a class="zc-nav-link" href="/loginform">Login / Register</a>
+    {% endif %}
 </div>
