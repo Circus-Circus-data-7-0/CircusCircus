@@ -224,7 +224,11 @@ body::before {
   max-width: 1260px;
   margin: 0 auto;
   display: grid;
+<<<<<<< HEAD
   grid-template-columns: 1fr;
+=======
+  grid-template-columns: 210px 1fr 230px;
+>>>>>>> 84c2623 (style coloring frontend)
   gap: 24px;
   padding: 24px 32px;
   flex: 1;
@@ -519,6 +523,7 @@ button {
   padding: 8px 14px;
   font-weight: 700;
 }
+<<<<<<< HEAD
 form[action="/action_react"] button {
   background: none;
   color: #000;
@@ -532,6 +537,8 @@ form[action="/action_react"] button:hover {
   background: #eee;
   color: #000;
 }
+=======
+>>>>>>> 84c2623 (style coloring frontend)
 
 #nolinks {
   text-decoration: none;
@@ -556,6 +563,7 @@ form[action="/action_react"] button:hover {
   .zc-nav-links {
     display: none;
   }
+<<<<<<< HEAD
 }
 
 /* Messaging */
@@ -578,4 +586,6 @@ form[action="/action_react"] button:hover {
 .message-filter select {
   width: auto;
   margin-left: 8px;
+=======
+>>>>>>> 84c2623 (style coloring frontend)
 }
