@@ -20,6 +20,7 @@ class Post(db.Model):
     upload_file = db.Column(db.String(255), nullable=True)
     content = db.Column(db.Text)
     private = db.Column(db.Boolean, default=False)
+    is_markdown = db.Column(db.Boolean, default=False)
     postdate = db.Column(db.DateTime)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     subforum_id = db.Column(db.Integer, db.ForeignKey('subforum.id'), nullable=True)
@@ -31,12 +32,13 @@ class Post(db.Model):
     lastcheck = None
     savedresponse = None
 
-    def __init__(self, title=None, content=None, postdate=None, upload_file=None, private=False):
+    def __init__(self, title=None, content=None, postdate=None, upload_file=None, private=False, is_markdown=False):
         self.title = title
         self.content = content
         self.postdate = postdate
         self.upload_file = upload_file
         self.private = private
+        self.is_markdown = is_markdown
 
     def get_time_string(self):
         # Recalculate every 30 seconds to avoid inaccurate time labels
@@ -127,6 +129,7 @@ def action_post():
 	if retry:
 		return render_template("createpost.html", subforum=subforum, errors=errors)
 	private = 'private' in request.form
+	is_markdown = 'is_markdown' in request.form
 	file = request.files.get('upload_file')
 	filename = None
 	if file and file.filename:
@@ -134,7 +137,7 @@ def action_post():
 		upload_folder = current_app.config['UPLOAD_FOLDER']
 		os.makedirs(upload_folder, exist_ok=True)
 		file.save(os.path.join(upload_folder, filename))
-	post = Post(title=title, content=content, postdate=datetime.datetime.now(), upload_file=filename, private=private)
+	post = Post(title=title, content=content, postdate=datetime.datetime.now(), upload_file=filename, private=private, is_markdown=is_markdown)
 	subforum.posts.append(post)
 	user.posts.append(post)
 	db.session.commit()

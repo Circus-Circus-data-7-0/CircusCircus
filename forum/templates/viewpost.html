@@ -16,9 +16,16 @@
 			{{ post.get_time_string() }}
 		</div>
 	</div>
-	<div class="postcontent">
+	<div class="postcontent" id="postcontent">
 		{{post.content}}
 	</div>
+	{% if post.is_markdown %}
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<script>
+		var el = document.getElementById('postcontent');
+		el.innerHTML = marked.parse(el.textContent);
+	</script>
+	{% endif %}
 	{% if post.upload_file %}
 		{% if post.upload_file.endswith(('.mp4', 'mov', '.webm')) %}
 			<video controls>

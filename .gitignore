@@ -1,6 +1,9 @@
 venv/
 .vscode
 
+# DM feature removed — prevent it from ever being re-added
+forum/templates/[Dd][Mm].html
+
 # Uploaded user files — kept locally only, not committed
 forum/static/uploads/*
 !forum/static/uploads/.gitkeep
