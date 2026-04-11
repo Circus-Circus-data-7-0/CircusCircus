@@ -3,7 +3,7 @@ from .routes import rt
 from .post import post_rt
 from .subforum import subforum_rt
 from .Reactions import rt_react
-from .DMs import rt_DM
+from .messages import rt_messages
 
 def create_app():
     """Construct the core application."""
@@ -18,7 +18,7 @@ def create_app():
     app.register_blueprint(post_rt)
     app.register_blueprint(subforum_rt)
     app.register_blueprint(rt_react)
-    app.register_blueprint(rt_DM)
+    app.register_blueprint(rt_messages)
     # Set globals
     from .models import db
     db.init_app(app)
