@@ -59,6 +59,9 @@
 		</div>
 		<div class="postusername">
 			by <b class="{% if post.user.admin %}adminusername{% endif %}"> {{post.user.username}}</b>
+			{% if current_user.is_authenticated and current_user.id != post.user.id %}
+			<a href="/messages?reply={{ post.user.username }}">(message)</a>
+			{% endif %}
 			<div class="date">
 			{{ post.get_time_string() }}
 			</div>

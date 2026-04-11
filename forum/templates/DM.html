@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+{% block body %}
+<form method="POST" action="/action_message">
+  <input type="text" name="recipient" id="recipient" placeholder="Username">
+  <textarea name="content" rows="4" cols="60"></textarea>
+  <input type="submit" value="Send">
+</form>
+{% for m in messages %}
+<div class="post">
+  <div class="postusername">from <b>{{ m.sender.username }}</b> — {{ m.postdate }}</div>
+  <div class="postcontent">{{ m.content }}</div>
+  <a href="/messages?reply={{ m.sender.username }}">Reply</a>
+</div>
+{% endfor %}
+<script>
+  const reply = new URLSearchParams(window.location.search).get('reply');
+  if (reply) document.getElementById('recipient').value = reply;
+</script>
+{% endblock %}

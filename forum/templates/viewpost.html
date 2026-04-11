@@ -8,7 +8,9 @@
 		{% if post.private %}<span style="color: grey; font-size: 0.85em;">🔒 Private</span>{% endif %}
 		<div class="postposter" {% if post.user.admin %} style="color: red;" {% endif %}>
 			{{ post.user.username }}
-
+			{% if current_user.is_authenticated and current_user.id != post.user.id %}
+			<a href="/messages?reply={{ post.user.username }}">(message)</a>
+			{% endif %}
 		</div>
 		<div class="posttime">
 			{{ post.get_time_string() }}
@@ -66,7 +68,9 @@
 	
 	<div class="comment">
 		<div class="commentuser">
-			(<span class="{% if comment.user.admin %}adminusername{% endif %}">{{ comment.user.username }}</span>) - 
+			(<span class="{% if comment.user.admin %}adminusername{% endif %}">{{ comment.user.username }}</span> {% if current_user.is_authenticated and current_user.id != comment.user.id %}
+			<a href="/messages?reply={{ comment.user.username }}">(message)</a>
+			{% endif %}) - 
 		</div>
 		<div class="commentcontent">
 			{{ comment.content }}
