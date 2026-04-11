@@ -59,7 +59,10 @@ def subforum():
 	subforum = Subforum.query.filter(Subforum.id == subforum_id).first()
 	if not subforum:
 		return error("That subforum does not exist!")
-	posts = Post.query.filter(Post.subforum_id == subforum_id).order_by(Post.id.desc()).limit(50)
+	posts = Post.query.filter(Post.subforum_id == subforum_id)
+	if not current_user.is_authenticated:
+		posts = posts.filter(Post.visibility == "public")
+	posts = posts.order_by(Post.id.desc()).limit(50)
 	subforumpath = subforum.path or generateLinkPath(subforum.id)
 
 	subforums = Subforum.query.filter(Subforum.parent_id == subforum_id).all()

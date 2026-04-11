@@ -21,7 +21,10 @@ def addpost():
 	subforum = Subforum.query.filter(Subforum.id == subforum_id).first()
 	if not subforum:
 		return error("That subforum does not exist!")
-	return render_template("createpost.html", subforum=subforum)
+	default_visibility = "public"
+	if getattr(current_user, "is_authenticated", False) and getattr(current_user, "settings", None):
+		default_visibility = current_user.settings.post_visibility or "public"
+	return render_template("createpost.html", subforum=subforum, default_visibility=default_visibility)
 
 @rt.route('/viewpost')
 def viewpost():
@@ -30,6 +33,8 @@ def viewpost():
 	post = Post.query.filter(Post.id == postid).first()
 	if not post:
 		return error("That post does not exist!")
+	if post.visibility == "private" and not current_user.is_authenticated:
+		return redirect("/loginform")
 	subforumpath = post.subforum.path or generateLinkPath(post.subforum.id)
 	# Newest replies appear first for easier reading.
 	comments = Post.query.filter(Post.parent_id == postid).order_by(Post.id.desc())
@@ -72,13 +77,16 @@ def action_post():
 		errors.append("Post must be between 10 and 5000 characters long!")
 		retry = True
 	if retry:
-		return render_template("createpost.html", subforum=subforum, errors=errors)
+		return render_template("createpost.html", subforum=subforum, errors=errors, default_visibility=request.form.get("visibility", "public"))
+	visibility = request.form.get("visibility", "public")
+	if visibility not in ("public", "private"):
+		visibility = "public"
 	file = request.files.get('upload_file')
 	filename = None
 	if file and file.filename:
 		filename = secure_filename(file.filename)
 		file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-	post = Post(title=title, content=content, postdate=datetime.datetime.now(), upload_file=filename)
+	post = Post(title=title, content=content, postdate=datetime.datetime.now(), upload_file=filename, visibility=visibility)
 	subforum.posts.append(post)
 	user.posts.append(post)
 	db.session.commit()

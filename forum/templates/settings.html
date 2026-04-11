@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="loginbox">
+	<h3>User Settings</h3>
+	<form action="/settings" method="POST">
+		<div class="loginelement">
+			<label for="profile_visibility">Profile visibility</label><br>
+			<select class="inputbox" name="profile_visibility" id="profile_visibility">
+				<option value="public" {% if settings.profile_visibility == 'public' %}selected{% endif %}>Public</option>
+				<option value="private" {% if settings.profile_visibility == 'private' %}selected{% endif %}>Private</option>
+			</select>
+		</div>
+		<div class="loginelement">
+			<label for="post_visibility">Default post visibility</label><br>
+			<select class="inputbox" name="post_visibility" id="post_visibility">
+				<option value="public" {% if settings.post_visibility == 'public' %}selected{% endif %}>Public</option>
+				<option value="private" {% if settings.post_visibility == 'private' %}selected{% endif %}>Private</option>
+			</select>
+		</div>
+		<div class="loginelement">
+			<label><input type="checkbox" name="show_email" {% if settings.show_email %}checked{% endif %}> Show my email address on my profile</label>
+		</div>
+		<div class="loginelement">
+			<label><input type="checkbox" name="allow_messages" {% if settings.allow_messages %}checked{% endif %}> Allow direct messages</label>
+		</div>
+		<div class="loginelement">
+			<input class="loginelement" type="submit" value="Save settings">
+		</div>
+	</form>
+</div>
+
+{% endblock %}

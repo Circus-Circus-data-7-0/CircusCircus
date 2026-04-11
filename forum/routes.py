@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user
 from flask_login.utils import login_required
 import datetime
 from flask import Blueprint, render_template, request, redirect, url_for
-from .models import User, Post, Comment, valid_content, valid_title, db, error
+from .models import User, UserSettings, Post, Comment, valid_content, valid_title, db, error
 from .user import username_taken, email_taken, valid_username
 from .subforum import Subforum, db, generateLinkPath
 
@@ -11,6 +11,24 @@ from .subforum import Subforum, db, generateLinkPath
 # The app is small enough to keep in one blueprint for now.
 
 rt = Blueprint('routes', __name__, template_folder='templates')
+
+
+def _request_bool(name, default=False):
+	value = request.form.get(name)
+	if value is None:
+		return default
+	return value.lower() in ("1", "true", "yes", "on")
+
+
+def _ensure_user_settings(user):
+	created = False
+	settings = user.settings
+	if settings is None:
+		settings = UserSettings()
+		user.settings = settings
+		db.session.add(settings)
+		created = True
+	return settings, created
 
 @rt.route('/action_login', methods=['POST'])
 def action_login():
@@ -58,10 +76,31 @@ def action_createaccount():
 	user = User(email, username, password)
 	if user.username == "admin":
 		user.admin = True
+	user.settings = UserSettings()
 	db.session.add(user)
 	db.session.commit()
 	login_user(user)
 	return redirect("/")
+
+
+@login_required
+@rt.route('/settings', methods=['GET', 'POST'])
+def settings():
+	# Show or update the current user's privacy preferences.
+	settings, created = _ensure_user_settings(current_user)
+	if created and request.method == 'GET':
+		db.session.commit()
+	if request.method == 'POST':
+		profile_visibility = request.form.get('profile_visibility', 'public')
+		post_visibility = request.form.get('post_visibility', 'public')
+		settings.profile_visibility = profile_visibility if profile_visibility in ('public', 'private') else 'public'
+		settings.post_visibility = post_visibility if post_visibility in ('public', 'private') else 'public'
+		settings.show_email = _request_bool('show_email')
+		settings.allow_messages = _request_bool('allow_messages', True)
+		db.session.commit()
+		return redirect('/settings')
+
+	return render_template('settings.html', settings=settings)
 
 
 # @rt.route('/subforum')

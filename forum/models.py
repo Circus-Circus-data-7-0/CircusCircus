@@ -17,6 +17,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     admin = db.Column(db.Boolean, default=False)
     posts = db.relationship("Post", backref="user")
+    settings = db.relationship("UserSettings", uselist=False, back_populates="user")
 
     def __init__(self, email, username, password):
         # Save the hashed password instead of the plain text password.
@@ -27,7 +28,33 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         # Compare a password guess against the stored hash.
         return check_password_hash(self.password_hash, password)
-    
+
+
+class UserSettings(db.Model):
+    # Store the per-user privacy and display preferences.
+    __tablename__ = "user_settings"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), unique=True, nullable=False)
+    profile_visibility = db.Column(db.String(20), nullable=False, default="public")
+    post_visibility = db.Column(db.String(20), nullable=False, default="public")
+    show_email = db.Column(db.Boolean, nullable=False, default=False)
+    allow_messages = db.Column(db.Boolean, nullable=False, default=True)
+
+    user = db.relationship("User", back_populates="settings")
+
+    def __init__(
+        self,
+        profile_visibility="public",
+        post_visibility="public",
+        show_email=False,
+        allow_messages=True,
+    ):
+        self.profile_visibility = profile_visibility
+        self.post_visibility = post_visibility
+        self.show_email = show_email
+        self.allow_messages = allow_messages
+
 
 
 class Subforum(db.Model):
@@ -45,51 +72,9 @@ class Subforum(db.Model):
         self.title = title
         self.description = description
 
-# Post is defined in post.py; imported here after db is ready to avoid
+# Post is defined in forum/post.py; imported here after db is ready to avoid
 # circular imports while keeping Post in its own module.
 from .post import Post  # noqa: E402
-class Post(db.Model):
-    # Store one forum post and link it to a user and subforum.
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(140), nullable=False)
-    content = db.Column(db.Text)
-    comments = db.relationship("Comment", backref="post")
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    subforum_id = db.Column(db.Integer, db.ForeignKey('subforum.id'))
-    postdate = db.Column(db.DateTime)
-
-    # Simple in-memory cache for human-readable time labels.
-    lastcheck = None
-    savedresponce = None
-
-    def __init__(self, title, content, postdate):
-        self.title = title
-        self.content = content
-        self.postdate = postdate
-
-    def get_time_string(self):
-        # Only recalculate the label every 30 seconds.
-        now = datetime.datetime.now()
-        if self.lastcheck is None or (now - self.lastcheck).total_seconds() > 30:
-            self.lastcheck = now
-        else:
-            return self.savedresponce
-
-        diff = now - self.postdate
-
-        seconds = diff.total_seconds()
-        if seconds / (60 * 60 * 24 * 30) > 1:
-            self.savedresponce =  " " + str(int(seconds / (60 * 60 * 24 * 30))) + " months ago"
-        elif seconds / (60 * 60 * 24) > 1:
-            self.savedresponce =  " " + str(int(seconds / (60*  60 * 24))) + " days ago"
-        elif seconds / (60 * 60) > 1:
-            self.savedresponce = " " + str(int(seconds / (60 * 60))) + " hours ago"
-        elif seconds / (60) > 1:
-            self.savedresponce = " " + str(int(seconds / 60)) + " minutes ago"
-        else:
-            self.savedresponce =  "Just a moment ago!"
-
-        return self.savedresponce
 
 # class Subforum(db.Model):
 #     # Represent a forum category and its optional child subforums.

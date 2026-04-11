@@ -8,7 +8,7 @@ if __package__ in (None, ""):
 from flask import render_template
 from flask_login import LoginManager
 from sqlalchemy import inspect, text
-from .models import db, User
+from .models import db, User, UserSettings
 from .subforum import Subforum
 
 from forum import create_app
@@ -61,6 +61,30 @@ def _sql_literal(value):
 	return f"'{escaped}'"
 
 
+def _coerce_visibility(value, default="public"):
+	if value is None:
+		return default
+	text_value = str(value).strip().lower()
+	if text_value in ("private", "hidden", "off", "false", "0"):
+		return "private"
+	if text_value in ("public", "open", "on", "true", "1"):
+		return "public"
+	return default
+
+
+def _coerce_bool(value, default=False):
+	if value is None:
+		return default
+	if isinstance(value, bool):
+		return value
+	text_value = str(value).strip().lower()
+	if text_value in ("1", "true", "yes", "on"):
+		return True
+	if text_value in ("0", "false", "no", "off"):
+		return False
+	return default
+
+
 def ensure_model_schema_compatibility():
 	# Keep existing MySQL tables compatible with current and future model columns.
 	inspector = inspect(db.engine)
@@ -93,6 +117,69 @@ def ensure_model_schema_compatibility():
 				)
 				conn.execute(text(sql))
 
+
+def migrate_legacy_user_settings():
+	# Copy any old privacy-related columns into the new one-row-per-user settings table.
+	inspector = inspect(db.engine)
+	existing_tables = set(inspector.get_table_names())
+	if "user" not in existing_tables or "user_settings" not in existing_tables:
+		return
+
+	user_columns = {column["name"] for column in inspector.get_columns("user")}
+	legacy_visibility_columns = (
+		"profile_visibility",
+		"privacy",
+		"privacy_level",
+		"profile_privacy",
+		"private_profile",
+	)
+	legacy_post_visibility_columns = (
+		"post_visibility",
+		"posts_visibility",
+		"private_posts",
+		"posts_private",
+		"public_posts",
+	)
+	legacy_email_columns = (
+		"show_email",
+		"email_public",
+		"public_email",
+	)
+	legacy_messages_columns = (
+		"allow_messages",
+		"messages_enabled",
+		"dm_enabled",
+		"allow_dm",
+	)
+
+	for user in User.query.all():
+		if user.settings is not None:
+			continue
+
+		values = {column: getattr(user, column) for column in user_columns if hasattr(user, column)}
+		profile_visibility = _coerce_visibility(
+			next((values[column] for column in legacy_visibility_columns if column in values), None)
+		)
+		post_visibility = _coerce_visibility(
+			next((values[column] for column in legacy_post_visibility_columns if column in values), None)
+		)
+		show_email = _coerce_bool(
+			next((values[column] for column in legacy_email_columns if column in values), None)
+		)
+		allow_messages = _coerce_bool(
+			next((values[column] for column in legacy_messages_columns if column in values), None),
+			True,
+		)
+
+		user.settings = UserSettings(
+			profile_visibility=profile_visibility,
+			post_visibility=post_visibility,
+			show_email=show_email,
+			allow_messages=allow_messages,
+		)
+
+	db.session.commit()
+
 # Flask-Login needs a loader so it can restore the current user from the session.
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -106,6 +193,7 @@ with app.app_context():
 	# Create tables if needed, then seed the database the first time it runs.
 	db.create_all()
 	ensure_model_schema_compatibility()
+	migrate_legacy_user_settings()
 	if not Subforum.query.all():
 		init_site()
 
