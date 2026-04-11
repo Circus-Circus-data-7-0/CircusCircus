@@ -5,6 +5,8 @@ from flask_login import current_user
 from flask_login.utils import login_required
 from httpx import post
 from werkzeug.utils import secure_filename
+from .models import db, valid_content, valid_title, error
+import httpx
 <<<<<<< HEAD
 from .models import db, valid_content, valid_title, error
 from .user import User
