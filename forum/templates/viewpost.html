@@ -27,7 +27,6 @@
 		{% else %}
 			<img src="/uploads/{{ post.upload_file }}">
 		{% endif %}
-	{% endif %}	
 	{% endif %}
 
 	{% if current_user.is_authenticated and (current_user.id == post.user_id or current_user.admin) %}
