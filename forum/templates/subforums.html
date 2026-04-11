@@ -1,24 +1,25 @@
 {% extends 'layout.html' %}
-{% block body%}
-<div class="toplevelinfo">
-	Top level subforums:
+{% block body %}
+<div class="zc-hero">
+  <div>
+    <h1>Welcome back, {% if current_user.is_authenticated %}<span>{{ current_user.username }}</span>{% else %}<span>stranger</span>{% endif %} 👋</h1>
+    <p>{{ config.SITE_DESCRIPTION }}</p>
+  </div>
 </div>
-{% for subforum in subforums %}
-<div class="subforumlisting">
-<div class="subforumtitle">
-<a href="/subforum?sub={{ subforum.id }}">
-{{ subforum.title}}
-</a>
-</div>
-<div class="subforumdesc">
-{{ subforum.description }}
-</div>
-</div>
-{% endfor %}
-
-<div class="subforumheaderlink">
-	{% if current_user.is_authenticated and current_user.admin %}
-	<a href="/createsubforum">Create a new forum</a>
-	{% endif %}
+<div style="display:grid;grid-template-columns:200px 1fr;gap:20px;margin-top:16px;">
+  <div>
+    <div class="zc-sidebar-label">Channels</div>
+    {% for subforum in subforums %}
+    <a class="zc-sidebar-link" href="/subforum?sub={{ subforum.id }}">{{ subforum.title }}</a>
+    {% endfor %}
+  </div>
+  <div>
+    {% for subforum in subforums %}
+    <div class="subforumlisting">
+      <div class="subforumtitle"><a href="/subforum?sub={{ subforum.id }}">{{ subforum.title }}</a></div>
+      <div class="subforumdesc">{{ subforum.description }}</div>
+    </div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}
