@@ -6,14 +6,8 @@ from flask_login.utils import login_required
 from httpx import post
 from werkzeug.utils import secure_filename
 from .models import db, valid_content, valid_title, error
-import httpx
-<<<<<<< HEAD
-from .models import db, valid_content, valid_title, error
 from .user import User
-=======
-from .models import db, User, valid_content, valid_title, error
 import httpx
->>>>>>> c53fd3b (Fixed indent error non type error)
 
 post_rt = Blueprint('post_routes', __name__, template_folder='templates')
 
