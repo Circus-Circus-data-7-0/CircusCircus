@@ -3,6 +3,7 @@ from .routes import rt
 from .post import post_rt
 from .subforum import subforum_rt
 from .Reactions import rt_react
+from .DMs import rt_DM
 
 def create_app():
     """Construct the core application."""

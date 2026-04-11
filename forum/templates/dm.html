@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+{% block body %}
+<form method="POST" action="/action_message">
+  <input type="text" name="recipient" placeholder="Username">
+  <textarea name="content" rows="4" cols="60"></textarea>
+  <input type="submit" value="Send">
+</form>
+{% for m in messages %}
+<div class="post">
+  <div class="postusername">from <b>{{ m.sender.username }}</b> — {{ m.postdate }}</div>
+  <div class="postcontent">{{ m.content }}</div>
+</div>
+{% endfor %}
+{% endblock %}
