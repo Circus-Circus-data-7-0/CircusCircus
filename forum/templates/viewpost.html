@@ -4,7 +4,7 @@
 
 <div class="actualpost">
 	<div class="actualposttitle">
-		<a href="/viewpost?post={{ post.id }}">{{post.title}}</a>
+		<a href="{{ url_for('routes.viewpost') }}?post={{ post.id }}">{{post.title}}</a>
 		{% if post.private %}<span style="color: grey; font-size: 0.85em;">🔒 Private</span>{% endif %}
 		<div class="postposter" {% if post.user.admin %} style="color: red;" {% endif %}>
 			{{ post.user.username }}
@@ -30,7 +30,7 @@
 
 </div>
 <div class="addcomment" id="addcomment">
-	<form action="/action_comment?post={{ post.id }}" method="POST">
+	<form action="{{ url_for('routes.comment') }}?post={{ post.id }}" method="POST">
 		<textarea class="inputbox varwidth" rows="6" name="content" placeholder="Write your comment here"></textarea><br>
 		<input class="inputbox comment-submit" type="submit" value="Comment">
 	</form>
@@ -43,7 +43,7 @@
 	<input type="button" id="displayaddcomment" onclick="toggle()" value="Add a comment">
 
 	{% else %}
-	<a href="/loginform">Login or register to make a comment</a>
+	<a href="{{ url_for('auth.loginform') }}">Login or register to make a comment</a>
 	{% endif %}
 </div>
 {%if comments%}

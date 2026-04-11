@@ -12,22 +12,22 @@
 <body>
 <div class="page-wrap">
 	<nav class="zc-navbar">
-		<a class="zc-logo" href="/">
+		<a class="zc-logo" href="{{ url_for('index') }}">
 			<div class="zc-logo-icon">Z</div>
 			<div class="zc-logo-text">ZIP<span>CHAT</span></div>
 		</a>
 
 		<div class="zc-nav-links">
-			<a class="zc-nav-link {% if request.path == '/' %}active{% endif %}" href="/"><i class="bi bi-house-fill"></i> Feed</a>
-			<a class="zc-nav-link {% if request.path == '/loginform' %}active{% endif %}" href="/loginform"><i class="bi bi-people-fill"></i> Account</a>
+			<a class="zc-nav-link {% if request.path == '/' %}active{% endif %}" href="{{ url_for('index') }}"><i class="bi bi-house-fill"></i> Feed</a>
+			<a class="zc-nav-link {% if request.path == '/loginform' %}active{% endif %}" href="{{ url_for('auth.loginform') }}"><i class="bi bi-people-fill"></i> Account</a>
 		</div>
 
 		<div class="zc-nav-right">
 			{% if current_user.is_authenticated %}
 			<span class="zc-nav-user {% if current_user.admin %}adminusername{% endif %}">{{ current_user.username }}</span>
-			<a class="btn-zc-ghost" href="/action_logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+			<a class="btn-zc-ghost" href="{{ url_for('auth.action_logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a>
 			{% else %}
-			<a class="btn-zc-primary" href="/loginform"><i class="bi bi-person-circle"></i> Login / Register</a>
+			<a class="btn-zc-primary" href="{{ url_for('auth.loginform') }}"><i class="bi bi-person-circle"></i> Login / Register</a>
 			{% endif %}
 		</div>
 	</nav>
@@ -47,14 +47,14 @@
 	<div class="zc-layout">
 		<div class="zc-sidebar-left">
 			<div class="zc-sidebar-label">Channels</div>
-			<a class="zc-sidebar-link {% if request.path == '/' %}active{% endif %}" href="/"><i class="bi bi-house-fill"></i> All Posts</a>
+			<a class="zc-sidebar-link {% if request.path == '/' %}active{% endif %}" href="{{ url_for('index') }}"><i class="bi bi-house-fill"></i> All Posts</a>
 			{% if top_subforums %}
 				{% for forum in top_subforums %}
-				<a class="zc-sidebar-link {% if request.path == '/subforum' and request.args.get('sub')|int == forum.id %}active{% endif %}" href="/subforum?sub={{ forum.id }}"><i class="bi bi-folder2-open"></i> {{ forum.title }}</a>
+				<a class="zc-sidebar-link {% if request.path == '/subforum' and request.args.get('sub')|int == forum.id %}active{% endif %}" href="{{ url_for('subforum_routes.subforum') }}?sub={{ forum.id }}"><i class="bi bi-folder2-open"></i> {{ forum.title }}</a>
 				{% endfor %}
 			{% endif %}
 			{% if current_user.is_authenticated and current_user.admin %}
-			<a class="zc-sidebar-link" href="/createsubforum"><i class="bi bi-plus-circle-fill"></i> Create Subforum</a>
+			<a class="zc-sidebar-link" href="{{ url_for('subforum_routes.create_subforum_page') }}"><i class="bi bi-plus-circle-fill"></i> Create Subforum</a>
 			{% endif %}
 		</div>
 
@@ -79,7 +79,7 @@
 				<div class="zc-widget-title">Recent Members</div>
 				{% if recent_users %}
 					{% for usr in recent_users %}
-					<a class="zc-dm-row" href="/loginform"><span class="zc-dm-name">{{ usr.username }}</span></a>
+					<a class="zc-dm-row" href="{{ url_for('auth.loginform') }}"><span class="zc-dm-name">{{ usr.username }}</span></a>
 					{% endfor %}
 				{% else %}
 				<p class="zc-muted-text">No registered members yet.</p>

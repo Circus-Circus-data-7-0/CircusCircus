@@ -16,7 +16,7 @@
 		{% for sub in subforums %}
 		<div class="subsubforums">
 		<div class="subsubforumtitle">
-		<a href="/subforum?sub={{ sub.id }}">{{ sub.title }}</a>
+		<a href="{{ url_for('subforum_routes.subforum') }}?sub={{ sub.id }}">{{ sub.title }}</a>
 		</div>
 		<div class="subsubforumdesc">
 		{{ sub.description }}
@@ -29,19 +29,19 @@
 	<div class="subforumheaderlink">
 	{% if current_user.is_authenticated %}
 	{% if current_user.admin %}
-	<a href="/createsubforum?parent={{ subforum.id }}">Create a subforum in <b>{{ subforum.title }}</b></a> | 
-	<a href="/addpost?sub={{ subforum.id }}">Create a post in <b>{{ subforum.title }}</b></a>
+	<a href="{{ url_for('subforum_routes.create_subforum_page') }}?parent={{ subforum.id }}">Create a subforum in <b>{{ subforum.title }}</b></a> | 
+	<a href="{{ url_for('routes.addpost') }}?sub={{ subforum.id }}">Create a post in <b>{{ subforum.title }}</b></a>
 	{% if not subforum.protected %}
-	| <form style="display: inline;" method="POST" action="/deletesubforum" onsubmit="return confirm('Are you sure you want to delete this subforum?');">
+	| <form style="display: inline;" method="POST" action="{{ url_for('subforum_routes.delete_subforum') }}" onsubmit="return confirm('Are you sure you want to delete this subforum?');">
 		<input type="hidden" name="subforum_id" value="{{ subforum.id }}">
 		<input type="submit" value="Delete Subforum" style="background: none; border: none; color: #0066cc; cursor: pointer; text-decoration: underline; padding: 0; font: inherit;">
 	</form>
 	{% endif %}
 	{% else %}
-	<a href="/addpost?sub={{ subforum.id }}">Create a post in <b>{{ subforum.title }}</b></a>
+	<a href="{{ url_for('routes.addpost') }}?sub={{ subforum.id }}">Create a post in <b>{{ subforum.title }}</b></a>
 	{% endif %}
 	{% else %}
-	<a href="/loginform">Log in or create an account to make a post in <b>{{ subforum.title }}</b></a>
+	<a href="{{ url_for('auth.loginform') }}">Log in or create an account to make a post in <b>{{ subforum.title }}</b></a>
 	{% endif %}
 	</div>
 	
@@ -55,7 +55,7 @@
 	{% for post in posts %}
 	<div class="post">
 		<div class="posttitle">
-		<a href="/viewpost?post={{ post.id }}">{{ post.title }}</a>
+		<a href="{{ url_for('routes.viewpost') }}?post={{ post.id }}">{{ post.title }}</a>
 		</div>
 		<div class="postusername">
 			by <b class="{% if post.user.admin %}adminusername{% endif %}"> {{post.user.username}}</b>

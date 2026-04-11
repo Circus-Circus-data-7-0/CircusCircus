@@ -3,7 +3,7 @@
 <div class="zc-toolbar">
 	<h2 class="zc-section-title"><i class="bi bi-collection-fill"></i> Top Level Subforums</h2>
 	{% if current_user.is_authenticated and current_user.admin %}
-	<a class="btn-zc-primary" href="/createsubforum"><i class="bi bi-plus-lg"></i> Create Forum</a>
+	<a class="btn-zc-primary" href="{{ url_for('subforum_routes.create_subforum_page') }}"><i class="bi bi-plus-lg"></i> Create Forum</a>
 	{% endif %}
 </div>
 
@@ -12,13 +12,13 @@
 	<article class="zc-post-card">
 		<div class="zc-card-head">
 			<h3 class="zc-card-title">
-				<a href="/subforum?sub={{ subforum.id }}">{{ subforum.title }}</a>
+				<a href="{{ url_for('subforum_routes.subforum') }}?sub={{ subforum.id }}">{{ subforum.title }}</a>
 			</h3>
 			<span class="zc-chip"><i class="bi bi-chat-left-text"></i> Forum</span>
 		</div>
 		<p class="zc-card-body">{{ subforum.description }}</p>
 		<div class="zc-card-actions">
-			<a class="btn-zc-ghost" href="/subforum?sub={{ subforum.id }}"><i class="bi bi-arrow-right-circle"></i> Open</a>
+			<a class="btn-zc-ghost" href="{{ url_for('subforum_routes.subforum') }}?sub={{ subforum.id }}"><i class="bi bi-arrow-right-circle"></i> Open</a>
 		</div>
 	</article>
 	{% endfor %}
