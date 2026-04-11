@@ -7,7 +7,6 @@ from httpx import post
 from werkzeug.utils import secure_filename
 from .models import db, valid_content, valid_title, error
 from .user import User
-import httpx
 
 post_rt = Blueprint('post_routes', __name__, template_folder='templates')
 
