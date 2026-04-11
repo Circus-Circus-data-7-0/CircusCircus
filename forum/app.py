@@ -17,8 +17,8 @@ from forum import create_app
 app = create_app()
 
 # Simple metadata used by the templates and app config.
-app.config['SITE_NAME'] = 'Schooner'
-app.config['SITE_DESCRIPTION'] = 'a schooner forum'
+app.config['SITE_NAME'] = 'ZipChat'
+app.config['SITE_DESCRIPTION'] = 'a Zip Code Wilmington forum'
 app.config['FLASK_DEBUG'] = 1
 
 def init_site():
