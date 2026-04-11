@@ -142,13 +142,13 @@ def action_post():
 @post_rt.route('/action_delete_post', methods=['POST'])
 @login_required
 def action_delete_post():
-	post_id = int(request.form['post_id'])
-	post = Post.query.filter(Post.id == post_id).first()
-	if not post:
-		return error("That post does not exist!")
-	if post.user_id != current_user.id and not current_user.admin:
-		return error("You do not have permission to delete this post.")
-	Post.query.filter(Post.parent_id == post_id).delete()
+    post_id = int(request.args.get("post"))
+    post = Post.query.filter(Post.id == post_id).first()
+    if not post:
+        return error("That post does not exist!")
+    if post.user_id != current_user.id and not current_user.admin:
+        return error("You do not have permission to delete this post.")
+    Post.query.filter(Post.parent_id == post_id).delete()
 	db.session.delete(post)
 	db.session.commit()
-	return redirect("/subforum?sub=" + str(post.subforum_id))
+    return redirect("/subforum?sub=" + str(post.subforum_id))
