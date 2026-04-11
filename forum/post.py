@@ -3,10 +3,9 @@ import os
 from flask import Blueprint, render_template, request, redirect, url_for, current_app, send_from_directory
 from flask_login import current_user
 from flask_login.utils import login_required
-from httpx import post
 from werkzeug.utils import secure_filename
-from .models import db, User, valid_content, valid_title, error
-import httpx
+from .models import db, valid_content, valid_title, error
+from .user import User
 
 post_rt = Blueprint('post_routes', __name__, template_folder='templates')
 
