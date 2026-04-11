@@ -7,10 +7,12 @@
 </form>
 <div style="margin-top:1%;margin-bottom:0.5%;">
   <b>Filter by sender:</b>
-  <a href="/messages">All</a>
-  {% for s in senders %}
-  | <a href="/messages?sender={{ s.username }}" {% if current_sender == s.username %}style="font-weight:bold;"{% endif %}>{{ s.username }}</a>
-  {% endfor %}
+  <select onchange="window.location='/messages?sender='+this.value">
+    <option value="">All</option>
+    {% for s in senders %}
+    <option value="{{ s.username }}" {% if current_sender == s.username %}selected{% endif %}>{{ s.username }}</option>
+    {% endfor %}
+  </select>
 </div>
 {% for m in messages %}
 <div class="post">
