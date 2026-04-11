@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, redirect
 from flask_login import login_required, current_user
-from .models import User, db
+from .models import db
 import datetime
+from .user import User
 
 class Messages(db.Model):
     id = db.Column(db.Integer, primary_key=True)
