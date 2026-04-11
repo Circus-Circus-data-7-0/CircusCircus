@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="message-compose">
+  <form method="POST" action="/action_message">
+    <input type="text" name="recipient" id="recipient" placeholder="Username">
+    <textarea name="content" rows="4" cols="60"></textarea>
+    <input type="submit" value="Send">
+  </form>
+  {% if request.args.get('error') %}
+  <p style="color:red;">{{ request.args.get('error') }}</p>
+  {% endif %}
+</div>
+<div class="message-filter">
+  <b>Filter by sender:</b>
+  <select onchange="window.location='/messages?sender='+this.value">
+    <option value="">All</option>
+    {% for s in senders %}
+    <option value="{{ s.username }}" {% if current_sender == s.username %}selected{% endif %}>{{ s.username }}</option>
+    {% endfor %}
+  </select>
+</div>
+{% for m in messages %}
+<div class="post">
+  <div class="postusername">from <b>{{ m.sender.username }}</b> — {{ m.postdate }}</div>
+  <div class="postcontent">{{ m.content }}</div>
+  <a href="/messages?reply={{ m.sender.username }}">Reply</a>
+</div>
+{% endfor %}
+<script>
+  const reply = new URLSearchParams(window.location.search).get('reply');
+  if (reply) document.getElementById('recipient').value = reply;
+</script>
+{% endblock %}

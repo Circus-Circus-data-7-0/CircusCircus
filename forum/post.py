@@ -3,8 +3,11 @@ import os
 from flask import Blueprint, render_template, request, redirect, url_for, current_app, send_from_directory
 from flask_login import current_user
 from flask_login.utils import login_required
+from httpx import post
 from werkzeug.utils import secure_filename
-from .models import db, User, valid_content, valid_title, error
+from .models import db, valid_content, valid_title, error
+from .user import User
+import httpx
 
 post_rt = Blueprint('post_routes', __name__, template_folder='templates')
 
@@ -137,3 +140,16 @@ def action_post():
 	db.session.commit()
 	return redirect("/viewpost?post=" + str(post.id))
 
+@post_rt.route('/action_delete_post', methods=['POST'])
+@login_required
+def action_delete_post():
+	post_id = int(request.form['post_id'])
+	post = Post.query.filter(Post.id == post_id).first()
+	if not post:
+		return error("That post does not exist!")
+	if post.user_id != current_user.id and not current_user.admin:
+		return error("You do not have permission to delete this post.")
+	Post.query.filter(Post.parent_id == post_id).delete()
+	db.session.delete(post)
+	db.session.commit()
+	return redirect("/subforum?sub=" + str(post.subforum_id))

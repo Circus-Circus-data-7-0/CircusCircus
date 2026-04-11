@@ -2,6 +2,7 @@ Flask
 Flask-Login
 Flask-SQLAlchemy
 gunicorn
+httpx
 itsdangerous
 Jinja2
 MarkupSafe

@@ -9,24 +9,24 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 # Database models
-class User(UserMixin, db.Model):
-    # Store account information and ownership of posts/comments.
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
-    email = db.Column(db.String(255), unique=True, nullable=False)
-    admin = db.Column(db.Boolean, default=False)
-    posts = db.relationship("Post", backref="user")
+# class User(UserMixin, db.Model):
+#     # Store account information and ownership of posts/comments.
+#     id = db.Column(db.Integer, primary_key=True)
+#     username = db.Column(db.String(80), unique=True, nullable=False)
+#     password_hash = db.Column(db.String(255), nullable=False)
+#     email = db.Column(db.String(255), unique=True, nullable=False)
+#     admin = db.Column(db.Boolean, default=False)
+#     posts = db.relationship("Post", backref="user")
 
-    def __init__(self, email, username, password):
-        # Save the hashed password instead of the plain text password.
-        self.email = email
-        self.username = username
-        self.password_hash = generate_password_hash(password)
+#     def __init__(self, email, username, password):
+#         # Save the hashed password instead of the plain text password.
+#         self.email = email
+#         self.username = username
+#         self.password_hash = generate_password_hash(password)
 
-    def check_password(self, password):
-        # Compare a password guess against the stored hash.
-        return check_password_hash(self.password_hash, password)
+#     def check_password(self, password):
+#         # Compare a password guess against the stored hash.
+#         return check_password_hash(self.password_hash, password)
 
 # Post is defined in post.py; imported here after db is ready to avoid
 # circular imports while keeping Post in its own module.

@@ -8,16 +8,17 @@ if __package__ in (None, ""):
 from flask import render_template
 from flask_login import LoginManager
 from sqlalchemy import inspect, text
-from .models import db, User
+from .models import db
 from .subforum import Subforum
+from .user import User
 
 from forum import create_app
 # Build the Flask app using the package factory.
 app = create_app()
 
 # Simple metadata used by the templates and app config.
-app.config['SITE_NAME'] = 'Schooner'
-app.config['SITE_DESCRIPTION'] = 'a schooner forum'
+app.config['SITE_NAME'] = 'ZipChat'
+app.config['SITE_DESCRIPTION'] = 'a Zip Code Wilmington forum'
 app.config['FLASK_DEBUG'] = 1
 
 def init_site():

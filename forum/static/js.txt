@@ -1,0 +1,7 @@
+function submitPost() {
+  const input = document.getElementById("composeInput");
+  if (!input.value.trim()) return;
+
+  alert("Post submitted: " + input.value);
+  input.value = "";
+}
