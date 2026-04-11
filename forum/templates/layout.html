@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
+<html>
 <head>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename="bootstrap.min.css")}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename="style.css")}}">
     <script src="{{url_for('static', filename="forum.js")}}"></script>
@@ -17,7 +17,9 @@
     {% if errors %}
     <div class="errors">
     {% for error in errors %}
-        <p class="error">{{ error }}</p>
+        <p class="error">
+            {{ error }}
+        </p>
     {% endfor %}
     </div>
     {% endif %}
@@ -28,7 +30,7 @@
     </div>
     <footer class="zc-footer">
         <div class="zc-footer-brand">{{ config.SITE_NAME }}<span>.</span></div>
-        <div class="zc-footer-copy">{{ config.SITE_DESCRIPTION }} · © 2026</div>
+        <div class="zc-footer-copy">{{ config.SITE_DESCRIPTION }}</div>
     </footer>
 </div>
 </body>
