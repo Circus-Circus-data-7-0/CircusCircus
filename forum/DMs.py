@@ -18,15 +18,22 @@ rt_DM = Blueprint('rt_DM', __name__, template_folder='templates')
 @rt_DM.route('/messages')
 @login_required
 def messages():
-    msgs = DM.query.filter_by(recipient_id=current_user.id).order_by(DM.id.desc()).all()
-    return render_template('messages.html', messages=msgs)
+    msgs = sender_filter = request.args.get('sender')
+query = DM.query.filter_by(recipient_id=current_user.id)
+if sender_filter:
+    sender = User.query.filter_by(username=sender_filter).first()
+    if sender:
+        query = query.filter_by(sender_id=sender.id)
+    msgs = query.order_by(DM.id.desc()).all()
+    senders = User.query.join(DM, DM.sender_id == User.id).filter(DM.recipient_id == current_user.id).distinct().all()
+    return render_template('messages.html', messages=msgs, senders=senders, current_sender=sender_filter)
 
 @rt_DM.route('/action_message', methods=['POST'])
 @login_required
 def action_message():
     recipient = User.query.filter_by(username=request.form['recipient']).first()
     if not recipient:
-        return redirect('/messages')
+        return render_template('messages.html', errors=["That username does not exist."], messages=DM.query.filter_by(recipient_id=current_user.id).order_by(DM.id.desc()).all(), senders=User.query.join(DM, DM.sender_id == User.id).filter(DM.recipient_id == current_user.id).distinct().all(), current_sender=None)
     msg = DM(content=request.form['content'], postdate=datetime.datetime.now(),
               sender_id=current_user.id, recipient_id=recipient.id)
     db.session.add(msg)

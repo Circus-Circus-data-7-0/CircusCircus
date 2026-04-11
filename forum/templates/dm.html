@@ -5,6 +5,13 @@
   <textarea name="content" rows="4" cols="60"></textarea>
   <input type="submit" value="Send">
 </form>
+<div style="margin-top:1%;margin-bottom:0.5%;">
+  <b>Filter by sender:</b>
+  <a href="/messages">All</a>
+  {% for s in senders %}
+  | <a href="/messages?sender={{ s.username }}" {% if current_sender == s.username %}style="font-weight:bold;"{% endif %}>{{ s.username }}</a>
+  {% endfor %}
+</div>
 {% for m in messages %}
 <div class="post">
   <div class="postusername">from <b>{{ m.sender.username }}</b> — {{ m.postdate }}</div>
