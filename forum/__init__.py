@@ -17,6 +17,7 @@ def create_app():
     app.register_blueprint(post_rt)
     app.register_blueprint(subforum_rt)
     app.register_blueprint(rt_react)
+    app.register_blueprint(rt_DM)
     # Set globals
     from .models import db
     db.init_app(app)
