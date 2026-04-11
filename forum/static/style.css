@@ -429,7 +429,7 @@ body::before {
   max-width: 1260px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 210px 1fr 230px;
+  grid-template-columns: 1fr;
   gap: 24px;
   padding: 24px 32px;
   flex: 1;
@@ -877,6 +877,19 @@ button {
   border-radius: 20px;
   padding: 8px 14px;
   font-weight: 700;
+}
+form[action="/action_react"] button {
+  background: none;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 14pt;
+}
+
+form[action="/action_react"] button:hover {
+  background: #eee;
+  color: #000;
 }
 
 #nolinks {
