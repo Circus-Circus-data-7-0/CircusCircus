@@ -1,24 +1,28 @@
 {% extends 'layout.html' %}
-{% block body%}
-<div class="toplevelinfo">
-	Top level subforums:
-</div>
-{% for subforum in subforums %}
-<div class="subforumlisting">
-<div class="subforumtitle">
-<a href="/subforum?sub={{ subforum.id }}">
-{{ subforum.title}}
-</a>
-</div>
-<div class="subforumdesc">
-{{ subforum.description }}
-</div>
-</div>
-{% endfor %}
-
-<div class="subforumheaderlink">
+{% block body %}
+<div class="zc-toolbar">
+	<h2 class="zc-section-title"><i class="bi bi-collection-fill"></i> Top Level Subforums</h2>
 	{% if current_user.is_authenticated and current_user.admin %}
-	<a href="/createsubforum">Create a new forum</a>
+	<a class="btn-zc-primary" href="/createsubforum"><i class="bi bi-plus-lg"></i> Create Forum</a>
 	{% endif %}
 </div>
+
+{% if subforums %}
+	{% for subforum in subforums %}
+	<article class="zc-post-card">
+		<div class="zc-card-head">
+			<h3 class="zc-card-title">
+				<a href="/subforum?sub={{ subforum.id }}">{{ subforum.title }}</a>
+			</h3>
+			<span class="zc-chip"><i class="bi bi-chat-left-text"></i> Forum</span>
+		</div>
+		<p class="zc-card-body">{{ subforum.description }}</p>
+		<div class="zc-card-actions">
+			<a class="btn-zc-ghost" href="/subforum?sub={{ subforum.id }}"><i class="bi bi-arrow-right-circle"></i> Open</a>
+		</div>
+	</article>
+	{% endfor %}
+{% else %}
+	<div class="zc-empty">No subforums yet.</div>
+{% endif %}
 {% endblock %}

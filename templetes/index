@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>ZipChat</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Your CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+
+<div class="page-wrap">
+
+  <!-- NAVBAR -->
+  <nav class="zc-navbar">
+    <a class="zc-logo" href="#">
+      <div class="zc-logo-icon">Z</div>
+      <div class="zc-logo-text">ZIP<span>CHAT</span></div>
+    </a>
+
+    <div class="zc-nav-links">
+      <a class="zc-nav-link active" href="#">Feed</a>
+      <a class="zc-nav-link" href="#">Trending</a>
+      <a class="zc-nav-link" href="#">Members</a>
+      <a class="zc-nav-link" href="#">Settings</a>
+    </div>
+
+    <div class="zc-nav-right">
+      <button class="btn-zc-primary">
+        <i class="bi bi-plus-lg"></i> New Post
+      </button>
+      <div class="zc-avatar">JS</div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="zc-hero">
+    <div>
+      <h1>Welcome back, <span>Zip Coder</span> 👋</h1>
+      <p>Wilmington developer community</p>
+    </div>
+  </div>
+
+  <!-- LAYOUT -->
+  <div class="zc-layout">
+
+    <!-- LEFT -->
+    <div class="zc-sidebar-left">
+      <div class="zc-sidebar-label">Channels</div>
+      <a class="zc-sidebar-link active" href="#">All Posts</a>
+      <a class="zc-sidebar-link" href="#">Java</a>
+      <a class="zc-sidebar-link" href="#">Python</a>
+      <a class="zc-sidebar-link" href="#">SQL</a>
+    </div>
+
+    <!-- CENTER FEED -->
+    <div class="zc-feed">
+
+      <!-- Compose -->
+      <div class="glass-card zc-compose">
+        <input class="zc-compose-input" id="composeInput" placeholder="Share something...">
+        <button class="btn-zc-primary mt-2" onclick="submitPost()">Post</button>
+      </div>
+
+      <!-- Sample Post -->
+      <div class="zc-post-card">
+        <div class="zc-post-author">Marcus Rivera</div>
+        <div class="zc-post-title">Spring Boot + MySQL setup</div>
+        <div class="zc-post-body">
+          Clean migration working after fixing dialect issues.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="zc-sidebar-right">
+      <div class="zc-widget">
+        <div class="zc-widget-title">Online</div>
+        <p>Marcus, Aaliyah, Dev...</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="zc-footer">
+    <div>ZIPCHAT © 2026</div>
+  </footer>
+
+</div>
+
+<!-- JS -->
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+</html>
