@@ -1,12 +1,12 @@
-# CircusCircus
+# ZIPCHAT
 
-This is a minimal forum written in python with Flask. It supports only the bare minumum of features to allow discussions, including user accounts, threads, and comments.
+This is a minimal forum written in Python with Flask. It supports only the bare minimum of features to allow discussions, including user accounts, threads, and comments.
 
 On first run, the default subforums will be created. Although custom subforums are not supported through any user interface, it is possible to modify forum/setup.py to create custom subforums.
 
 ## Team Guide
 
-If you want the full explanation of the MySQL migration, startup flow, and schema changes, read [MYSQL_MIGRATION_GUIDE.md](/Users/ethan/Projects/CircusCircus/MYSQL_MIGRATION_GUIDE.md).
+If you want the full explanation of the MySQL migration, startup flow, and schema changes, read [MYSQL_MIGRATION_GUIDE.md](MYSQL_MIGRATION_GUIDE.md).
 
 For normal local startup, run:
 

@@ -17,15 +17,16 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     admin = db.Column(db.Boolean, default=False)
     permissions_raw = db.Column(db.Text, default="")
-    privacy = db.Column(db.Text, default="public")
+    privacy = db.Column(db.String(20), default="public")
     posts = db.relationship("Post", backref="user")
 
-    def __init__(self, email, username, password):
+    def __init__(self, email, username, password, privacy="public", admin=False, permissions=None):
         # Save the hashed password instead of the plain text password.
         self.email = email
         self.username = username
         self.set_password(password)
         self.privacy = privacy
+        self.admin = admin
         self.permissions = permissions or []
 
     @property
@@ -37,12 +38,53 @@ class User(UserMixin, db.Model):
     def password(self, password):
         self.set_password(password)
 
+    @property
+    def is_admin(self):
+        return self.admin
+
+    @is_admin.setter
+    def is_admin(self, value):
+        self.admin = value
+
+    @property
+    def permissions(self):
+        if not self.permissions_raw:
+            return []
+        return [permission for permission in self.permissions_raw.split(",") if permission]
+
+    @permissions.setter
+    def permissions(self, permissions):
+        self.permissions_raw = ",".join(permissions or [])
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         # Compare a password guess against the stored hash.
         return check_password_hash(self.password_hash, password)
+
+    def get_permissions(self):
+        return self.permissions
+
+    def add_permission(self, permission):
+        permissions = self.permissions
+        if permission not in permissions:
+            permissions.append(permission)
+            self.permissions = permissions
+
+    def remove_permission(self, permission):
+        permissions = self.permissions
+        if permission in permissions:
+            permissions.remove(permission)
+            self.permissions = permissions
+
+    def is_allowed(self, permission):
+        return self.admin or permission in self.permissions
+
+    def set_privacy(self, privacy):
+        if privacy not in ["public", "private"]:
+            raise ValueError("Privacy must be 'public' or 'private'")
+        self.privacy = privacy
 
 # Post is defined in post.py; imported here after db is ready to avoid
 # circular imports while keeping Post in its own module.

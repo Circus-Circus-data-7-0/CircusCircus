@@ -1,11 +1,20 @@
-from user.services.auth import register_user
+import os
+import sys
 
-# Simulate user input
-user = register_user(
-    user_id=1,
-    username="Bianca123",
-    password="Pass123!",
-    email="bianca@email.com"
-)
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
 
-print(user)
+from forum import create_app
+from forum.user.services.auth import register_user
+
+app = create_app()
+
+with app.app_context():
+    user = register_user(
+        username="Bianca123",
+        password="Pass123!",
+        email="bianca@email.com"
+    )
+
+    print(user)

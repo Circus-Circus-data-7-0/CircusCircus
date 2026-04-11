@@ -90,3 +90,7 @@ def action_post():
 	user.posts.append(post)
 	db.session.commit()
 	return redirect("/viewpost?post=" + str(post.id))
+
+
+# Keep compatibility with app factory registration.
+posts_bp = rt

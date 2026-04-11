@@ -7,16 +7,17 @@ if __package__ in (None, ""):
 
 from flask import render_template
 from flask_login import LoginManager
-from .models import db, User
-from .subforum import Subforum, db
 
-from forum import create_app
+from . import create_app
+from .models import User, db
+from .post import Post
+from .subforum import Subforum
 # Build the Flask app using the package factory.
 app = create_app()
 
 # Simple metadata used by the templates and app config.
-app.config['SITE_NAME'] = 'Schooner'
-app.config['SITE_DESCRIPTION'] = 'a schooner forum'
+app.config['SITE_NAME'] = 'ZIPCHAT'
+app.config['SITE_DESCRIPTION'] = 'a ZIPCHAT forum'
 app.config['FLASK_DEBUG'] = 1
 
 def init_site():
@@ -55,6 +56,34 @@ login_manager.init_app(app)
 def load_user(userid):
 	# Look up the full User row for the stored session ID.
 	return User.query.get(userid)
+
+
+@app.context_processor
+def inject_channel_links():
+	"""Expose helper values for channel links and real dashboard stats."""
+	def channel_url(title):
+		sub = Subforum.query.filter(Subforum.title == title).first()
+		if sub:
+			return f"/subforum?sub={sub.id}"
+		return "/"
+
+	stats = {
+		"members": User.query.count(),
+		"posts": Post.query.filter(Post.parent_id == None).count(),
+		"subforums": Subforum.query.count(),
+		# No realtime presence tracking exists yet, so show the true known value.
+		"online": 0,
+	}
+
+	recent_users = User.query.order_by(User.id.desc()).limit(5).all()
+	top_subforums = Subforum.query.filter(Subforum.parent_id == None).order_by(Subforum.id).all()
+
+	return {
+		"channel_url": channel_url,
+		"stats": stats,
+		"recent_users": recent_users,
+		"top_subforums": top_subforums,
+	}
 
 with app.app_context():
 	# Create tables if needed, then seed the database the first time it runs.
