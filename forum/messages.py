@@ -35,6 +35,9 @@ def action_message():
     recipient = User.query.filter_by(username=request.form['recipient']).first()
     if not recipient:
         return render_template('messages.html', errors=["That username does not exist."], messages=Messages.query.filter_by(recipient_id=current_user.id).order_by(Messages.id.desc()).all(), senders=User.query.join(Messages, Messages.sender_id == User.id).filter(Messages.recipient_id == current_user.id).distinct().all(), current_sender=None)
+    allow_messages = recipient.settings.allow_messages if recipient.settings else True
+    if not allow_messages:
+        return render_template('messages.html', errors=["This user is not accepting direct messages."], messages=Messages.query.filter_by(recipient_id=current_user.id).order_by(Messages.id.desc()).all(), senders=User.query.join(Messages, Messages.sender_id == User.id).filter(Messages.recipient_id == current_user.id).distinct().all(), current_sender=None)
     msg = Messages(content=request.form['content'], postdate=datetime.datetime.now(),
               sender_id=current_user.id, recipient_id=recipient.id)
     db.session.add(msg)
