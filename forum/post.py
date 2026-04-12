@@ -3,11 +3,11 @@ import os
 from flask import Blueprint, render_template, request, redirect, url_for, current_app, send_from_directory
 from flask_login import current_user
 from flask_login.utils import login_required
-from httpx import post
+# from httpx import post
 from werkzeug.utils import secure_filename
 from .models import db, valid_content, valid_title, error
 from .user import User
-import httpx
+# import httpx
 
 post_rt = Blueprint('post_routes', __name__, template_folder='templates')
 
@@ -19,8 +19,9 @@ class Post(db.Model):
     title = db.Column(db.Text, nullable=True)
     upload_file = db.Column(db.String(255), nullable=True)
     content = db.Column(db.Text)
-    private = db.Column(db.Boolean, default=False)
+    # private = db.Column(db.Boolean, default=False)
     is_markdown = db.Column(db.Boolean, default=False)
+    visibility = db.Column(db.String(20), nullable=False, default="public")
     postdate = db.Column(db.DateTime)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     subforum_id = db.Column(db.Integer, db.ForeignKey('subforum.id'), nullable=True)
@@ -32,13 +33,15 @@ class Post(db.Model):
     lastcheck = None
     savedresponse = None
 
-    def __init__(self, title=None, content=None, postdate=None, upload_file=None, private=False, is_markdown=False):
+    # def __init__(self, title=None, content=None, postdate=None, upload_file=None, private=False):
+    def __init__(self, title=None, content=None, postdate=None, upload_file=None, visibility="public", is_markdown=False):
         self.title = title
         self.content = content
         self.postdate = postdate
         self.upload_file = upload_file
-        self.private = private
         self.is_markdown = is_markdown
+        # self.private = private
+        self.visibility = visibility
 
     def get_time_string(self):
         # Recalculate every 30 seconds to avoid inaccurate time labels
@@ -79,7 +82,10 @@ def addpost():
 	subforum = Subforum.query.filter(Subforum.id == subforum_id).first()
 	if not subforum:
 		return error("That subforum does not exist!")
-	return render_template("createpost.html", subforum=subforum)
+	default_visibility = "public"
+	if current_user.is_authenticated and current_user.settings:
+		default_visibility = current_user.settings.post_visibility or "public"
+	return render_template("createpost.html", subforum=subforum, default_visibility=default_visibility)
 
 @post_rt.route('/viewpost')
 def viewpost():
@@ -87,8 +93,9 @@ def viewpost():
 	post = Post.query.filter(Post.id == postid).first()
 	if not post:
 		return error("That post does not exist!")
-	if post.private and (not current_user.is_authenticated or post.user_id != current_user.id):
-		return error("This post is private.")
+	# if post.private and (not current_user.is_authenticated or post.user_id != current_user.id):
+	if post.visibility == "private" and not current_user.is_authenticated:
+		return redirect("/loginform")
 	subforumpath = post.subforum.path or generateLinkPath(post.subforum.id)
 	comments = Post.query.filter(Post.parent_id == postid).order_by(Post.id.desc())
 	return render_template("viewpost.html", post=post, path=subforumpath, comments=comments)
@@ -127,8 +134,11 @@ def action_post():
 		errors.append("Post must be between 10 and 5000 characters long!")
 		retry = True
 	if retry:
-		return render_template("createpost.html", subforum=subforum, errors=errors)
-	private = 'private' in request.form
+		return render_template("createpost.html", subforum=subforum, errors=errors, default_visibility=request.form.get("visibility", "public"))
+	# private = 'private' in request.form
+	visibility = request.form.get("visibility", "public")
+	if visibility not in ("public", "private"):
+		visibility = "public"
 	is_markdown = 'is_markdown' in request.form
 	file = request.files.get('upload_file')
 	filename = None
@@ -137,7 +147,7 @@ def action_post():
 		upload_folder = current_app.config['UPLOAD_FOLDER']
 		os.makedirs(upload_folder, exist_ok=True)
 		file.save(os.path.join(upload_folder, filename))
-	post = Post(title=title, content=content, postdate=datetime.datetime.now(), upload_file=filename, private=private, is_markdown=is_markdown)
+	post = Post(title=title, content=content, postdate=datetime.datetime.now(), upload_file=filename, visibility=visibility, is_markdown=is_markdown)
 	subforum.posts.append(post)
 	user.posts.append(post)
 	db.session.commit()

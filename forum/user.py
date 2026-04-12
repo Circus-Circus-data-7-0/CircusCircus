@@ -2,6 +2,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 import datetime
 from .models import db
+from .user_setting import UserSettings
 # Shared SQLAlchemy object used by the app factory and all models.
 from flask_sqlalchemy import SQLAlchemy
 
@@ -16,6 +17,7 @@ class User(UserMixin, db.Model):
     admin = db.Column(db.Boolean, default=False)
     privacy = db.Column(db.String(20), default="public")
     posts = db.relationship("Post", backref="user")
+    settings = db.relationship("UserSettings", uselist=False, back_populates="user")
 
     def __init__(self, email, username, password, privacy="public", admin=False):
         # Save the hashed password instead of the plain text password.
@@ -148,9 +150,9 @@ def action_createaccount():
         return render_template("login.html", errors=errors)
 
     user = User(email, username, password, privacy=privacy)
+    user.settings = UserSettings(profile_visibility=privacy)
     if user.username == "admin":
         user.admin = True
-        user.add_permission("admin:all")
     db.session.add(user)
     db.session.commit()
     login_user(user)
