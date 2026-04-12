@@ -1,32 +1,26 @@
 {% extends 'layout.html' %}
 {% block body %}
 
+{% if request.args.get('saved') %}
+<div class="loginbox" style="border-color: var(--zc-green); color: var(--zc-green-dark); font-weight: 600;">
+	Settings saved successfully.
+</div>
+{% endif %}
+
 <div class="loginbox">
 	<h3>Settings</h3>
 	<form action="/settings" method="POST">
-		<label>Profile visibility</label><br>
-		<select class="loginelement" name="profile_visibility">
-			<option value="public" {% if settings.profile_visibility == 'public' %}selected{% endif %}>Public</option>
-			<option value="private" {% if settings.profile_visibility == 'private' %}selected{% endif %}>Private</option>
-		</select><br>
-
-		<label>Default post visibility</label><br>
-		<select class="loginelement" name="post_visibility">
-			<option value="public" {% if settings.post_visibility == 'public' %}selected{% endif %}>Public</option>
-			<option value="private" {% if settings.post_visibility == 'private' %}selected{% endif %}>Private</option>
-		</select><br>
-
-		<label>
-			<input type="checkbox" name="show_email" {% if settings.show_email %}checked{% endif %}>
-			Show my email on my profile
-		</label><br>
-
-		<label>
-			<input type="checkbox" name="allow_messages" {% if settings.allow_messages %}checked{% endif %}>
-			Allow direct messages
-		</label><br>
-
-		<input class="loginelement" type="submit" value="Save Settings">
+	<select class="loginelement" name="profile_visibility">
+		<option value="public"  {% if settings.profile_visibility == 'public'  %}selected{% endif %}>Profile visibility: Public</option>
+		<option value="private" {% if settings.profile_visibility == 'private' %}selected{% endif %}>Profile visibility: Private</option>
+	</select><br>
+	<select class="loginelement" name="post_visibility">
+		<option value="public"  {% if settings.post_visibility == 'public'  %}selected{% endif %}>Default post visibility: Public</option>
+		<option value="private" {% if settings.post_visibility == 'private' %}selected{% endif %}>Default post visibility: Private</option>
+	</select><br>
+	<label><input type="checkbox" name="show_email" {% if settings.show_email %}checked{% endif %}> Show my email on my profile</label><br>
+	<label><input type="checkbox" name="allow_messages" {% if settings.allow_messages %}checked{% endif %}> Allow direct messages</label><br>
+	<input class="loginelement" type="submit" value="Save Settings">
 	</form>
 </div>
 

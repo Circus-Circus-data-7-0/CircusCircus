@@ -69,8 +69,10 @@ def settings():
             post_visibility if post_visibility in ("public", "private") else "public"
         )
         user_settings.show_email = _request_bool("show_email")
-        user_settings.allow_messages = _request_bool("allow_messages", True)
+        # _request_bool("allow_messages", True) was incorrect — an unchecked checkbox
+        # sends nothing, so the default must be False, not True.
+        user_settings.allow_messages = _request_bool("allow_messages")
         db.session.commit()
-        return redirect("/settings")
+        return redirect("/settings?saved=1")
 
     return render_template("settings.html", settings=user_settings)
