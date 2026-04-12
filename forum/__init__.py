@@ -5,6 +5,7 @@ from .subforum import subforum_rt
 from .Reactions import rt_react
 from .messages import rt_messages
 from .user import auth_bp
+from .user_setting import settings_bp
 
 def create_app():
     """Construct the core application."""
@@ -21,6 +22,7 @@ def create_app():
     app.register_blueprint(rt_react)
     app.register_blueprint(rt_messages)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(settings_bp)
     # Set globals
     from .models import db
     db.init_app(app)
@@ -29,4 +31,3 @@ def create_app():
         # Create tables on startup so the app can run against a fresh database.
         db.create_all()
         return app
-
