@@ -11,6 +11,7 @@ from sqlalchemy import inspect, text
 from .models import db
 from .subforum import Subforum
 from .user import User
+from .user_setting import UserSettings
 
 from forum import create_app
 # Build the Flask app using the package factory.
@@ -62,6 +63,29 @@ def _sql_literal(value):
 	return f"'{escaped}'"
 
 
+def migrate_legacy_user_settings():
+	# Backfill UserSettings rows for existing users using the privacy column,
+	# and migrate post visibility from the old boolean to the new string column.
+	inspector = inspect(db.engine)
+	existing_tables = set(inspector.get_table_names())
+
+	if "user" in existing_tables and "user_settings" in existing_tables:
+		for user in User.query.all():
+			if user.settings is not None:
+				continue
+			profile_visibility = user.privacy if user.privacy in ("public", "private") else "public"
+			user.settings = UserSettings(profile_visibility=profile_visibility)
+		db.session.commit()
+
+	if "post" in existing_tables:
+		post_columns = {col["name"] for col in inspector.get_columns("post")}
+		if "private" in post_columns and "visibility" in post_columns:
+			with db.engine.begin() as conn:
+				conn.execute(text(
+					"UPDATE post SET visibility = 'private' WHERE private = TRUE AND visibility = 'public'"
+				))
+
+
 def ensure_model_schema_compatibility():
 	# Keep existing MySQL tables compatible with current and future model columns.
 	inspector = inspect(db.engine)
@@ -107,6 +131,7 @@ with app.app_context():
 	# Create tables if needed, then seed the database the first time it runs.
 	db.create_all()
 	ensure_model_schema_compatibility()
+	migrate_legacy_user_settings()
 	if not Subforum.query.all():
 		init_site()
 

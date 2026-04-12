@@ -5,6 +5,7 @@
 <div class="zc-nav-right">
     {% if current_user.is_authenticated %}
     <span class="zc-nav-user {% if current_user.admin %}adminusername{% endif %}">{{ current_user.username }}</span>
+    <a class="zc-nav-link" href="/settings">Settings</a>
     <a class="zc-nav-link" href="/messages">Messages</a>
     <a class="zc-nav-link" href="/action_logout">Logout</a>
     {% else %}
